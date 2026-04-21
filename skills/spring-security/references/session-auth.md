@@ -153,7 +153,31 @@ public AuthenticationFailureHandler authenticationFailureHandler() {
 
 ---
 
-## 6) 세션 타임아웃 설정
+## 6) REST API 미인증 접근 → 401 반환 (중요)
+
+폼 로그인 기본 동작은 미인증 요청을 **302 리다이렉트**(로그인 페이지로)로 처리한다.
+REST API 클라이언트는 리다이렉트를 따르지 않으므로 반드시 **401 JSON**으로 바꿔야 한다.
+
+```java
+.exceptionHandling(ex -> ex
+    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+    // 로그인 실패(FailureHandler)와 구분:
+    // FailureHandler  = 로그인 시도 자체가 실패한 경우 (잘못된 비밀번호 등)
+    // EntryPoint      = 인증 없이 보호된 리소스에 접근한 경우
+)
+```
+
+필요한 import:
+```java
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+```
+
+요약 체크리스트에도 반영 — 하단 참조.
+
+---
+
+## 7) 세션 타임아웃 설정
 
 ```yaml
 server:
@@ -175,3 +199,4 @@ server:
 - [ ] 수평 확장 환경이면 Spring Session + Redis 구성
 - [ ] 세션 쿠키 `httpOnly = true`, 운영 환경 `secure = true`
 - [ ] 동시 로그인 제한이 필요하면 `maximumSessions` 설정
+- [ ] REST API 이면 `HttpStatusEntryPoint(UNAUTHORIZED)` 추가 — 미인증 접근 시 302 → 401
