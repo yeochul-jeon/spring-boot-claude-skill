@@ -78,8 +78,8 @@ public class MemberController {
 
 ### 4. 예외 처리
 
-`@RestControllerAdvice` 하나를 프로젝트 전체에 등록하고 `ProblemDetail` 반환.  
-도메인 예외 → HTTP 상태 매핑은 `references/exception-handling.md` 참조.
+컨트롤러 내부 `@ExceptionHandler` **금지** — 모든 예외는 별도 `@RestControllerAdvice`로 분리.  
+`ProblemDetail` 반환, 도메인 예외 → HTTP 상태 매핑은 `references/exception-handling.md` 참조.
 
 ### 5. Validation
 

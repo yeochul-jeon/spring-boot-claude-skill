@@ -1,5 +1,9 @@
 # 예외 처리 — @RestControllerAdvice + ProblemDetail
 
+> **원칙**: 모든 예외 매핑은 `@RestControllerAdvice` 한 곳에 모은다.
+> 컨트롤러 클래스 내부에 `@ExceptionHandler` 메서드를 두는 것은 **안티패턴** — 중복 발생, 일관성 깨짐, 테스트 어려움.
+> `spring-principles/references/anti-patterns.md` 참조.
+
 ## 1) 기본 구조
 
 프로젝트 전체에 `@RestControllerAdvice` 하나를 등록한다.  

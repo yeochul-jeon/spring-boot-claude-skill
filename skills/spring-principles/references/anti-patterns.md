@@ -127,3 +127,33 @@ public void processB() {
 **문제**: `long price`, `String email` 등 원시 타입으로 도메인 개념 표현 → 유효성 검사 중복, 의미 불명확.
 
 → `templates/value-object.md`, `references/rich-domain.md` 참조.
+
+---
+
+## 8) 컨트롤러 내부 `@ExceptionHandler`
+
+**문제**: 예외 처리 로직이 컨트롤러마다 흩어짐 → 동일 예외를 컨트롤러마다 따로 처리, 일관성 없는 에러 응답.
+
+```java
+// 금지 — 컨트롤러 내부 예외 처리
+@RestController
+public class OrderController {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ProblemDetail> handleIllegal(IllegalArgumentException ex) {
+        // ← 이 핸들러는 OrderController 요청에만 적용됨
+    }
+}
+```
+
+```java
+// 권장 — 별도 @RestControllerAdvice
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ProblemDetail> handleIllegal(IllegalArgumentException ex) {
+        // 전체 컨트롤러에 적용
+    }
+}
+```
+
+→ `spring-web/references/exception-handling.md` 참조.
