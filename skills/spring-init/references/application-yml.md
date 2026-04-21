@@ -146,7 +146,30 @@ logging:
 
 ---
 
-## 6) 원칙
+## 6) 보안·CORS 환경변수 기본값 패턴
+
+운영 환경변수가 없는 **로컬/테스트** 실행 시 앱이 부트 실패하지 않도록, CORS 등 보안 설정에도 기본값을 제공한다.
+
+```yaml
+# application.yml (공통) — 환경변수 없으면 기본값으로 부트 성공
+app:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+# application-prod.yml — 운영에서는 반드시 주입 강제
+app:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:?ALLOWED_ORIGINS required in production}
+```
+
+**패턴 요약**:
+- `${VAR:default}` — 없으면 기본값 (로컬/dev 환경 적합)
+- `${VAR:?message}` — 없으면 부트 실패 + 오류 메시지 (운영 환경 적합)
+- 기본값 없이 `${VAR}` 만 쓰면 환경변수 미설정 시 `null` 주입 → 런타임 NPE 위험
+
+---
+
+## 7) 원칙
 
 - **민감정보는 YAML 에 상수로 박지 않는다.** `${ENV_VAR}` 또는 `${ENV_VAR:?message}` 사용
 - `ddl-auto: create`, `create-drop` 은 테스트/로컬 전용
@@ -156,7 +179,7 @@ logging:
 
 ---
 
-## 7) `.gitignore` 권장 추가
+## 8) `.gitignore` 권장 추가
 
 ```
 /.env

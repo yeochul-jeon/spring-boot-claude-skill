@@ -73,6 +73,21 @@ dependencies {
 }
 ```
 
+**주의 — Spring Boot 4.x 아티팩트명 변경**:
+
+start.spring.io 메타데이터(`fetch-latest-versions.sh`)로 조회한 현재 기본 버전이 **4.x** 이상이라면 아래 표를 확인한다.
+버전 숫자는 스크립트로만 확인하며 문서에 직접 박지 않는다.
+
+| 용도 | Boot 3.x | Boot 4.x |
+|------|----------|----------|
+| Servlet MVC 웹 | `spring-boot-starter-web` | `spring-boot-starter-webmvc` |
+| MVC 슬라이스 테스트 | `spring-boot-starter-test` (내장) | `spring-boot-starter-webmvc-test` |
+| H2 콘솔 | `spring-boot-starter-data-jpa` (자동) | `spring-boot-h2console` (별도 추가) |
+| JPA 슬라이스 테스트 | `spring-boot-starter-data-jpa` (내장) | `spring-boot-starter-data-jpa-test` |
+| 보안 테스트 유틸 | `spring-security-test` (내장) | `spring-boot-starter-security-test` |
+
+아티팩트명을 확신할 수 없을 때는 `./gradlew dependencies` 로 BOM 포함 여부를 확인한다.
+
 ---
 
 ## 4) 권장 태스크 설정
