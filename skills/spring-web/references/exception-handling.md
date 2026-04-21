@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
                 fe -> Objects.requireNonNullElse(fe.getDefaultMessage(), "invalid"),
                 (a, b) -> a
             ));
-        pd.setProperty("fieldErrors", fieldErrors);
+        pd.setProperty("errors", fieldErrors);
         return pd;
     }
 
@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
   "status": 400,
   "detail": "입력값 검증 오류",
   "instance": "/api/v1/members",
-  "fieldErrors": {
+  "errors": {
     "email": "이메일 형식이 올바르지 않습니다",
     "password": "비밀번호는 8자 이상이어야 합니다"
   }
