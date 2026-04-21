@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Claude Code 로컬 설정
+.claude/settings.local.json
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Env / Secrets
+.env
+.env.*
+application-secret.yml
+application-*-local-override.yml
+
+# Build artifacts
+build/
+out/
+target/
+*.class
+*.log
+
+# Temp / test scratch
+tmp/
+*.zip
