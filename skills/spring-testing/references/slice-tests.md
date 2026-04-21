@@ -233,6 +233,116 @@ class MemberIntegrationTest {
 
 ---
 
+---
+
+## Spring Security 통합 테스트
+
+`@SpringBootTest` + `@AutoConfigureMockMvc` 에서 실제 로그인·세션·로그아웃 흐름을 검증한다.
+
+### 1) 테스트 구조
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("local")
+class AuthControllerTest {
+
+    @Autowired MockMvc mockMvc;
+    @Autowired MemberRepository memberRepository;   // DB 초기화용
+
+    @BeforeEach
+    void cleanDb() {
+        memberRepository.deleteAll();
+        // 주의: @Transactional 테스트 메서드와 병용 시 커밋 시점 충돌 가능.
+        // @SpringBootTest 통합 테스트에서는 deleteAll() 방식이 안전.
+    }
+}
+```
+
+### 2) 폼 로그인 테스트 (`SecurityMockMvcRequestBuilders.formLogin`)
+
+```java
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+
+@Test
+void 로그인_성공() throws Exception {
+    // 먼저 회원 생성
+    signup("alice", "pw12345!");
+
+    mockMvc.perform(formLogin("/api/v1/auth/login")
+                    .user("alice").password("pw12345!"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.username").value("alice"));
+}
+
+@Test
+void 비밀번호_불일치_로그인_실패() throws Exception {
+    signup("alice", "pw12345!");
+
+    mockMvc.perform(formLogin("/api/v1/auth/login")
+                    .user("alice").password("wrong"))
+            .andExpect(status().isUnauthorized());
+}
+```
+
+### 3) 세션 유지 → 로그아웃 흐름
+
+```java
+import org.springframework.mock.web.MockHttpSession;
+
+@Test
+void 로그아웃_후_접근_거부() throws Exception {
+    signup("alice", "pw12345!");
+
+    // 1. 로그인 → 세션 획득
+    MvcResult loginResult = mockMvc.perform(formLogin("/api/v1/auth/login")
+                    .user("alice").password("pw12345!"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+
+    // 2. 세션 유지 상태로 보호된 리소스 접근
+    mockMvc.perform(get("/api/v1/me").session(session))
+            .andExpect(status().isOk());
+
+    // 3. 로그아웃
+    mockMvc.perform(post("/api/v1/auth/logout").session(session))
+            .andExpect(status().isNoContent());
+
+    // 4. 세션 무효화 후 재접근 → 401
+    mockMvc.perform(get("/api/v1/me").session(session))
+            .andExpect(status().isUnauthorized());
+}
+```
+
+### 4) ProblemDetail 응답 검증
+
+`GlobalExceptionHandler`가 `ProblemDetail`을 반환하는 경우 아래 패턴으로 검증한다.
+
+```java
+// 400 Validation Failed
+mockMvc.perform(post("/api/v1/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"\",\"password\":\"pw\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.title").value("Validation Failed"))
+        .andExpect(jsonPath("$.errors.username").exists())  // errors 맵 (필드별 오류)
+        .andExpect(jsonPath("$.errors.password").exists());
+
+// 409 Conflict
+mockMvc.perform(post("/api/v1/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"alice\",\"password\":\"pw12345!\"}"))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.title").value("Conflict"));
+```
+
+> `$.errors` 키 이름은 `GlobalExceptionHandler`에서 `pd.setProperty("errors", fieldErrors)` 로 설정한 키와 일치해야 한다.
+> `spring-web/references/exception-handling.md` 의 GlobalExceptionHandler 템플릿 참조.
+
+---
+
 ## 요약 체크리스트
 
 - [ ] 슬라이스 어노테이션을 목적에 맞게 선택 (`@WebMvcTest` / `@DataJpaTest` / `@JsonTest`)
@@ -240,3 +350,6 @@ class MemberIntegrationTest {
 - [ ] `@WebMvcTest`에 대상 Controller 클래스 명시
 - [ ] Security 연동 시 `@WithMockUser` 또는 `@Import(SecurityConfig.class)` 사용
 - [ ] `@SpringBootTest`는 E2E 범위로 최소화, 슬라이스 대체 불가 케이스에만 사용
+- [ ] Security 통합 테스트: `@BeforeEach deleteAll()` 로 테스트 간 DB 상태 격리
+- [ ] 로그인/세션/로그아웃 흐름: `formLogin()` + `MockHttpSession` 사용
+- [ ] ProblemDetail 검증: `jsonPath("$.title")`, `jsonPath("$.errors.fieldName")`

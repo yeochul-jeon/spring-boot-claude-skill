@@ -72,6 +72,9 @@ class MemberControllerTest {
 }
 ```
 
+Security 실제 로그인·세션·로그아웃 흐름 검증은 `references/slice-tests.md` 의 "Spring Security 통합 테스트" 섹션 참조.
+(`formLogin()`, `MockHttpSession`, `@BeforeEach deleteAll()`, ProblemDetail jsonPath 패턴 포함)
+
 ### 4. 통합 테스트 (필요 시)
 
 `references/testcontainers.md` 패턴 적용.
