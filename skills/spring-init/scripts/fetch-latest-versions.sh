@@ -10,7 +10,7 @@ METADATA=$(curl -sfL https://start.spring.io/metadata/client) || {
 
 BOOT_VERSION_RAW=$(echo "$METADATA" | jq -r '.bootVersion.default')
 # Gradle plugin portal requires X.Y.Z format — strip .RELEASE / .BUILD-SNAPSHOT suffixes
-BOOT_VERSION=$(echo "$BOOT_VERSION_RAW" | sed 's/\.\(RELEASE\|BUILD-SNAPSHOT\|RC[0-9]*\|M[0-9]*\)$//')
+BOOT_VERSION=$(echo "$BOOT_VERSION_RAW" | sed -E 's/\.(RELEASE|BUILD-SNAPSHOT|RC[0-9]*|M[0-9]*)$//')
 JAVA_DEFAULT=$(echo "$METADATA" | jq -r '.javaVersion.default')
 JAVA_VALUES=$(echo "$METADATA" | jq -c '.javaVersion.values | map(.id)')
 

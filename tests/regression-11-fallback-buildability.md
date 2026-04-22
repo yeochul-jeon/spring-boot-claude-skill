@@ -5,6 +5,13 @@
 결함 A~F 재발 여부를 체크리스트로 확인한다.
 
 > 선행 조건: `tests/manual-test-setup.md` 의 "스킬 인식 경로" 섹션 숙지.
+>
+> **주의**: 이전 테스트에서 `/etc/hosts` 에 `start.spring.io` 항목이 남아있으면
+> metadata API 도 차단되어 테스트 A 가 실패한다. 먼저 확인·제거한다:
+> ```bash
+> grep "start.spring.io" /etc/hosts          # 잔존 여부 확인
+> sudo sed -i '' '/start.spring.io/d' /etc/hosts  # 있으면 제거
+> ```
 
 ---
 
@@ -21,11 +28,26 @@ claude
 
 ## 2. 테스트 A — zip 실패 → fallback → 빌드 성공
 
-### 시뮬레이션
+### 시뮬레이션 — generate-project.sh 임시 수정
 
-별도 터미널에서 `/etc/hosts` 에 `/starter.zip` 호스트를 차단하거나
-`generate-project.sh` 의 curl 을 임시 실패하도록 수정한다.
-(metadata API 는 정상 유지)
+`/etc/hosts` 는 도메인 단위 차단만 가능하므로 `/starter.zip` 경로만 선택적으로
+막을 수 없다. `generate-project.sh` 에 `exit 56` 을 임시 삽입해 curl 실패를
+재현한다. `/metadata/client` 는 영향 없음.
+
+**수정 위치**: `skills/spring-init/scripts/generate-project.sh`
+
+```diff
+  PKG_NAME="com.example.$(echo "$ARTIFACT" | sed 's/[-_]//g')"
++
++ exit 56  # TEST ONLY: simulate /starter.zip failure — 테스트 후 즉시 제거
+
+  curl -sfL "https://start.spring.io/starter.zip" \
+```
+
+> `exit 56` 은 회고 #11 실제 장애 시 curl 이 반환한 exit code 와 동일하다.
+> `set -euo pipefail` 로 스크립트가 즉시 종료되어 fallback 분기를 유발한다.
+
+**테스트 완료 즉시 해당 줄을 삭제**해야 한다. 잔존 시 이후 모든 프로젝트 생성이 실패한다.
 
 ### 프롬프트
 
@@ -57,8 +79,14 @@ claude
 **결함 F — 사용자 구두 버전 요청 금지**
 - [ ] zip 실패 시 사용자에게 "버전 숫자를 알려주세요" 요청 0건
 
-**최종 빌드**
-- [ ] `./gradlew build` 컴파일 + 테스트 통과
+**최종 빌드** ← 이 항목은 실제 커맨드 실행 없이 체크 금지
+
+```bash
+cd /path/to/test-retro11/order-api && ./gradlew build --no-daemon 2>&1 | tail -5
+```
+
+- [ ] 위 커맨드를 **실행했음**
+- [ ] `BUILD SUCCESSFUL` 포함 — stdout 마지막 5줄을 결과 보고 §5에 첨부
 
 ---
 
@@ -111,6 +139,8 @@ sudo sed -i '' '/start.spring.io/d' /etc/hosts
 - Gradle wrapper 버전:
   [...]
 - ./gradlew build 결과: [성공 / 실패]
+- ./gradlew build stdout 마지막 5줄: (BUILD SUCCESSFUL 포함 여부 필수 기재)
+  [...]
 
 ## 테스트 B (중단 프로토콜)
 - 재시도 로그: [...]

@@ -127,9 +127,11 @@ metadata API 는 성공했는데 `/starter.zip` 만 장애일 때 한해 다음 
      `fetch-latest-versions.sh` 반환값 외 어떤 출처도 허용하지 않는다.
 2. Gradle 래퍼·`settings.gradle.kts`·`build.gradle.kts` 를 수동 작성
    - 모든 파일은 **절대 경로**로 Write 한다 (§0 CWD 비영속 규칙 참조).
-3. `bootVersion` 은 **`plugins {}` 블록에만** 기입:
+3. `bootVersion` 은 **`plugins {}` 블록에만** 기입. `io.spring.dependency-management` 는
+   **버전 필수** (`1.1.7` 또는 현행 안정판) — 생략하면 Gradle plugin portal 조회 실패:
    ```kotlin
    id("org.springframework.boot") version "<fetch-latest-versions.sh 반환값>"
+   id("io.spring.dependency-management") version "1.1.7"
    ```
 4. `implementation(...)` 등 의존성 좌표에는 절대 버전을 쓰지 않는다 (BOM 관리)
 4-5. Gradle wrapper 를 생성한다 (`references/gradle-conventions.md` §0 Boot-Gradle 호환 표 참조):
