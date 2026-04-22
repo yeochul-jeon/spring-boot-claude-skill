@@ -82,8 +82,45 @@ Greenfield Spring Boot 프로젝트를 생성한다. 버전은 항상 start.spri
 ```
 
 반환되는 JSON의 `bootVersion`, `javaDefault`를 이후 단계에서 사용.
-실패하면 사용자에게 "start.spring.io 접근 실패"를 알리고 중단.
-임의로 버전을 추정해서 진행하지 않는다.
+
+**절대 규칙 재진술**: 학습 데이터에서 기억한 버전(`3.5.x`, `4.0.x` 등)을
+`build.gradle.kts` 어디에도 기입하지 않는다. 스크립트 반환값만 사용한다.
+
+#### 2-a. 실패 분기 — 엔드포인트 구분
+
+`start.spring.io` 는 두 개의 독립 엔드포인트를 사용한다. 실패 유형에 따라 대응이 다르다.
+
+| 엔드포인트 | 사용처 | 실패 시 대응 |
+|---|---|---|
+| `GET /metadata/client` | `fetch-latest-versions.sh` (버전 조회) | **중단 프로토콜** |
+| `POST /starter.zip` | `generate-project.sh` (zip 생성) | **fallback 허용** (아래 2-c) |
+
+#### 2-b. 재시도 정책
+
+어느 쪽이든 1차 실패 시 **2초 → 5초 간격으로 3회 재시도**한다. 재시도 도중
+성공하면 정상 흐름을 계속한다. 3회 모두 실패 시 2-c 또는 중단으로 분기.
+
+#### 2-c. zip 생성만 실패한 경우 — 허용 fallback
+
+metadata API 는 성공했는데 `/starter.zip` 만 장애일 때 한해 다음 경로가 허용된다.
+
+1. `fetch-latest-versions.sh` 로 `bootVersion` 을 확보 (반드시 이 값만 사용)
+2. Gradle 래퍼·`settings.gradle.kts`·`build.gradle.kts` 를 수동 작성
+3. `bootVersion` 은 **`plugins {}` 블록에만** 기입:
+   ```kotlin
+   id("org.springframework.boot") version "<fetch-latest-versions.sh 반환값>"
+   ```
+4. `implementation(...)` 등 의존성 좌표에는 절대 버전을 쓰지 않는다 (BOM 관리)
+5. 사용자에게 "zip API 장애로 수동 scaffold 적용, Boot 버전은 metadata 조회값 사용" 을 명시 보고
+
+#### 2-d. 중단 프로토콜
+
+metadata API 가 3회 재시도 모두 실패하거나, 네트워크 자체 차단이 확인된 경우:
+
+- 사용자에게 "start.spring.io metadata 접근 실패, 임의 버전 추정 금지 원칙에 따라 중단" 을 보고
+- **금지**: 학습 데이터에 있는 버전 숫자를 임시로라도 기입해 진행하는 것
+- **금지**: 테스트 통과를 이유로 하드코딩 결과물을 묵인하는 것
+- 대안: 네트워크 복구 후 재실행, 또는 오프라인 캐시(있을 경우)로 전환 후 사용자 승인 받기
 
 ### 3. 프로젝트 생성
 

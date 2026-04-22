@@ -130,6 +130,7 @@ Claude 에게 입력:
 | 7개 시나리오 케이스 체크리스트 | `tests/cases.md` |
 | 회고 #8 보안 회귀 가이드 | `tests/regression-8-security-rest-api.md` |
 | 회고 #9 아키텍처 인터뷰 회귀 가이드 | `tests/regression-9-architecture-interview.md` |
+| 회고 #10 Initializr fallback 회귀 가이드 | `tests/regression-10-initializr-fallback.md` |
 | 수동 테스트 환경 설정 | `tests/manual-test-setup.md` |
 
 ---
