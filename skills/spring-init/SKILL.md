@@ -97,6 +97,8 @@ Greenfield Spring Boot 프로젝트를 생성한다. 버전은 항상 start.spri
 - PostgreSQL 선택 시: `data-jpa,postgresql` 또는 `mybatis,postgresql`
 - 보안 선택 시 추가: `security`
 
+> `bootVersion` 앞자리가 **4 이상**이면 `references/gradle-conventions.md` §3 표의 **4.x 열** 아티팩트명을 사용한다. (`spring-boot-starter-web` → `spring-boot-starter-webmvc` 등)
+
 ### 4. 패키지 구조 적용
 
 ```bash
@@ -118,4 +120,5 @@ Greenfield Spring Boot 프로젝트를 생성한다. 버전은 항상 start.spri
 - [ ] `.gitignore`, `README.md` 포함
 - [ ] `application-local.yml` / `application-prod.yml` 분리
 - [ ] 최소 1개의 smoke test 포함 (ApplicationContext 로딩 검증)
+- [ ] `build.gradle.kts` 아티팩트명이 Boot major 버전과 일치 (3.x: `spring-boot-starter-web`, 4.x: `spring-boot-starter-webmvc`)
 - [ ] Java 21 toolchain이 `build.gradle.kts`에 명시됨
