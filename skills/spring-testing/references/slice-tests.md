@@ -21,7 +21,8 @@
 
 ## 2) @WebMvcTest
 
-**목적**: Controller 계층 단독 검증. Service는 `@MockBean`으로 대체한다.
+**목적**: Controller 계층 단독 검증. Service는 `@MockitoBean`으로 대체한다.
+(Boot 3.4+ 기준. `org.springframework.test.context.bean.override.mockito.MockitoBean`)
 
 ```java
 @WebMvcTest(MemberController.class)  // 대상 Controller 명시 — 전체 스캔 방지
@@ -33,7 +34,7 @@ class MemberControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     MemberService memberService;
 
     @Test
@@ -226,9 +227,9 @@ class MemberIntegrationTest {
 @DataJpaTest
 // replace = NONE 없음 → H2 사용 → 운영 DB 방언 차이 버그 은폐
 
-// 금지: 불필요한 @MockBean 남발 — 컨텍스트 캐시 파괴
+// 금지: 불필요한 @MockitoBean 남발 — 컨텍스트 캐시 파괴
 @WebMvcTest(MemberController.class)
-@MockBean MemberRepository memberRepository;  // Controller 계층에 불필요, 캐시 미스 발생
+@MockitoBean MemberRepository memberRepository;  // Controller 계층에 불필요, 캐시 미스 발생
 ```
 
 ---

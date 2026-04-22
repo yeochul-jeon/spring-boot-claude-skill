@@ -106,7 +106,7 @@ static MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.0")
 
 ## 5) 테스트 컨텍스트 캐싱
 
-Spring 테스트 컨텍스트는 동일 설정이면 캐싱·재사용한다. `@MockBean`이 하나라도
+Spring 테스트 컨텍스트는 동일 설정이면 캐싱·재사용한다. `@MockitoBean`이 하나라도
 다르면 **새 컨텍스트가 생성**되어 부팅 시간이 늘어난다.
 
 **공통 기반 클래스로 묶기**

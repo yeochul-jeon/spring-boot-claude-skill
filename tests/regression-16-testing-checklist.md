@@ -45,8 +45,11 @@ echo "=== [T6] withReuse ===" && grep -rn "withReuse" $TEST/ || echo "FAIL: with
 # T7: Fixtures / ObjectMother 패턴 사용 (1건 이상이어야 PASS)
 echo "=== [T7] Fixtures/ObjectMother ===" && grep -rn "Fixtures\|ObjectMother" $TEST/ || echo "FAIL: Fixtures 패턴 없음"
 
-# T8: @MockBean (Boot 3.4+는 @MockitoBean 권장)
-echo "=== [T8] @MockBean ===" && grep -rn "@MockBean" $TEST/ || echo "INFO: @MockBean 없음"
+# T8a: @MockitoBean 사용 확인 (1건 이상이어야 PASS — @WebMvcTest 슬라이스 사용 시)
+echo "=== [T8a] @MockitoBean ===" && grep -rn "@MockitoBean" $TEST/ || echo "FAIL: @MockitoBean 없음 — @MockBean 사용 중 가능성"
+
+# T8b: @MockBean 잔존 확인 (0건이어야 PASS — Boot 3.4+ deprecated)
+echo "=== [T8b] @MockBean 잔존 ===" && grep -rn "@MockBean" $TEST/ && echo "FAIL: @MockBean 발견 — @MockitoBean 으로 교체 필요" || echo "PASS"
 ```
 
 ---
@@ -75,6 +78,9 @@ echo "=== [T8] @MockBean ===" && grep -rn "@MockBean" $TEST/ || echo "INFO: @Moc
 - [ ] 인라인 new 도메인(...) 반복 없음
 - [ ] UUID.randomUUID() · Faker 무분별한 랜덤 없음
 
+MockitoBean
+- [ ] @MockitoBean 사용 (@MockBean 없음 — Boot 3.4+ deprecated)
+
 spring-principles 교차
 - [ ] 테스트 클래스도 spring-principles 체크리스트 전 항목 통과
 ```
@@ -87,6 +93,7 @@ spring-principles 교차
 |------|------|------|------|
 | 2026-04-22 | 전체 (회원 CRUD Controller·Service·Repository + 통합 테스트) | FAIL (결함 4건) | 초기 baseline — retro #18 결함 수집 용도 |
 | 2026-04-22 | 2차 회전 — SKILL 로드 상태 재실행 | PASS (결함 0건) | T1~T8 전부 기대값 충족; codex 리뷰 블로킹 없음 |
+| 2026-04-22 | @MockitoBean 마이그레이션 (retro #19) | 문서 검증 PASS | SKILL.md·references·regression-16 @MockBean 0건; @MockitoBean ≥ 3건 |
 
 ### 2026-04-22 결함 목록
 
