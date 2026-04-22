@@ -121,10 +121,44 @@ Member lockedMember = MemberFixtures.aLockedMember();
 - [ ] 통합 테스트에 H2 없음 — TestContainers로 실제 DB 엔진 사용
 - [ ] `@AutoConfigureTestDatabase(replace = NONE)` 적용 (`@DataJpaTest` 사용 시)
 - [ ] 픽스처에 `UUID.randomUUID()` · Faker 무분별한 랜덤 없음
+- [ ] 도메인별 Fixtures / ObjectMother 클래스 작성 — 인라인 `new 도메인(...)` 반복 없음
 - [ ] `@SpringBootTest`가 정말 필요한 E2E 범위로만 한정됨
 - [ ] 컨테이너 재사용 설정(`withReuse(true)`) 적용 — 로컬 빌드 속도 보장
 - [ ] `testImplementation("org.testcontainers:junit-jupiter")` 의존성 포함
 - [ ] 테스트 코드도 `spring-principles` 체크리스트 전 항목 통과
+
+## grep 자동 검증 패턴
+
+체크리스트 실행 전 아래 명령으로 명백한 위반을 빠르게 탐지한다.
+`<TEST>` 는 `src/test/java`, `<BUILD>` 는 `build.gradle.kts` 절대 경로.
+
+```bash
+# T1: H2 인메모리 설정 금지 (0건이어야 PASS)
+grep -rn "h2\|H2Dialect\|h2:mem" <TEST>/../resources/   # 있으면 TestContainers 교체 필요
+
+# T2: @SpringBootTest 남용 확인 (0건이어야 PASS — 또는 E2E 목적만 존재)
+grep -rn "@SpringBootTest" <TEST>/   # 있으면 슬라이스 가능 여부 검토
+
+# T3: @AutoConfigureTestDatabase(replace=NONE) 확인 (1건 이상이어야 PASS — @DataJpaTest 사용 시)
+grep -rn "AutoConfigureTestDatabase\|replace = NONE" <TEST>/   # 없으면 H2 자동 치환 → FAIL
+
+# T4: @Testcontainers 사용 확인 (1건 이상이어야 PASS — 통합 테스트 포함 시)
+grep -rn "@Testcontainers\|MySQLContainer\|PostgreSQLContainer" <TEST>/   # 없으면 FAIL
+
+# T5: testcontainers 의존성 확인 (1건 이상이어야 PASS)
+grep -n "testcontainers" <BUILD>   # 없으면 FAIL
+
+# T6: withReuse(true) 컨테이너 재사용 설정 (1건 이상이어야 PASS — Testcontainers 사용 시)
+grep -rn "withReuse" <TEST>/   # 없으면 매 실행마다 컨테이너 재시작
+
+# T7: Fixtures / ObjectMother 패턴 사용 확인 (1건 이상이어야 PASS)
+grep -rn "Fixtures\|ObjectMother" <TEST>/   # 없으면 인라인 new 도메인() 반복 → 검토 필요
+
+# T8: @MockBean (Boot 3.4+는 @MockitoBean 사용 권장)
+grep -rn "@MockBean" <TEST>/   # Boot 3.4+라면 @MockitoBean으로 교체 권장
+```
+
+결과가 있으면 `references/` 해당 파일의 Before→After 패턴을 적용한다.
 
 ## references/ 목록
 
