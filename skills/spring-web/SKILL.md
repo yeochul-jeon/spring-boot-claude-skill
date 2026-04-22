@@ -92,11 +92,43 @@ Bean Validation 어노테이션 카탈로그·커스텀 validator는 `references
 ## 작성 후 체크리스트
 
 - [ ] Controller 메서드의 반환 타입이 DTO (`*Response` 또는 `ResponseEntity<*Response>`)
-- [ ] `@RestControllerAdvice`가 등록되어 있고 `ProblemDetail` 반환
-- [ ] 예외 → HTTP 상태 매핑이 `@RestControllerAdvice` 내에 문서화
+- [ ] `@RequestBody`에 `Map<String, String>` 또는 raw 타입이 없다 — `*Request` record 사용
 - [ ] `@RequestBody` 파라미터에 `@Valid` 적용
+- [ ] `@RestControllerAdvice`가 등록되어 있고 `ProblemDetail` 반환
+- [ ] Controller 내부에 `@ExceptionHandler` 없음 — `@RestControllerAdvice`로 분리
+- [ ] 에드혹 에러 JSON (`Map<String, String>`) 없음 — `ProblemDetail`로 통일
 - [ ] URL이 명사 복수 + kebab-case (`/members`, `/order-items`)
 - [ ] `spring-principles` 체크리스트 전 항목 통과
+
+## grep 자동 검증 패턴
+
+체크리스트 실행 전 아래 명령으로 명백한 위반을 빠르게 탐지한다.
+`<SRC>` 는 프로젝트의 `src/main/java` 절대 경로.
+
+```bash
+# W1: Controller가 Entity를 직접 반환하는지 (0건이어야 PASS)
+grep -rn "public Member\|public Order\|public Product\|public User" <SRC>/*/controller/
+
+# W2: @RestControllerAdvice 없음 (1건 이상이어야 PASS)
+grep -rn "@RestControllerAdvice" <SRC>   # 0건이면 FAIL
+
+# W3: Controller 내부 @ExceptionHandler (0건이어야 PASS)
+grep -rn "@ExceptionHandler" <SRC>/*/controller/
+
+# W4: ProblemDetail 미사용 — 에드혹 에러 Map (0건이어야 PASS)
+grep -rn "Map<String.*String>.*error\|put.*\"error\"\|new HashMap" <SRC>/*/controller/
+
+# W5a: @Valid 없는 @RequestBody (출력이 있으면 확인 필요)
+grep -rn "@RequestBody" <SRC>/*/controller/ | grep -v "@Valid"
+
+# W5b: @RequestBody에 Map 사용 (0건이어야 PASS)
+grep -rn "@RequestBody Map<" <SRC>/*/controller/
+
+# W6: URL 단수 또는 camelCase 패턴 확인 (수동 확인 병행)
+grep -rn "@RequestMapping\|@PostMapping\|@GetMapping\|@PutMapping\|@DeleteMapping" <SRC>/*/controller/
+```
+
+결과가 있으면 `references/` 해당 파일의 Before→After 패턴을 적용한다.
 
 ## references/ 목록
 
