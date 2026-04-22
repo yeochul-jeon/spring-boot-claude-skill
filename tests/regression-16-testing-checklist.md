@@ -86,6 +86,7 @@ spring-principles 교차
 | 날짜 | 항목 | 결과 | 비고 |
 |------|------|------|------|
 | 2026-04-22 | 전체 (회원 CRUD Controller·Service·Repository + 통합 테스트) | FAIL (결함 4건) | 초기 baseline — retro #18 결함 수집 용도 |
+| 2026-04-22 | 2차 회전 — SKILL 로드 상태 재실행 | PASS (결함 0건) | T1~T8 전부 기대값 충족; codex 리뷰 블로킹 없음 |
 
 ### 2026-04-22 결함 목록
 
@@ -104,3 +105,24 @@ testing-domain 결함 (3건 — 탐지 공백):
 
 > testing-domain 3건은 SKILL.md 항목 존재, grep 자동화 부재 → grep 섹션 추가로 탐지 수단 강화.
 > T_Fixture는 구조 공백 — "도메인별 Fixtures / ObjectMother" 신규 체크리스트 항목 추가.
+
+### 2026-04-22 2차 회전 — SKILL 로드 상태 결과
+
+Sandbox: `/Users/cjenm/github/test-retro18-v2/test-api` (1차 `test-retro18/` 는 baseline 보존)
+
+grep T1~T8 결과:
+
+| 항목 | 기대값 | 결과 |
+|------|--------|------|
+| T1: H2 설정 (`src/test/resources`) | 0건 | PASS — `application.yml` 없음 |
+| T2: `@SpringBootTest` 남용 | 0건 | PASS — 없음 |
+| T3: `@AutoConfigureTestDatabase(replace=NONE)` | ≥ 1건 | PASS — `MemberRepositoryTest.java:20` |
+| T4: `@Testcontainers` / `MySQLContainer` | ≥ 1건 | PASS — `MemberRepositoryTest.java:21,25` |
+| T5: `testcontainers` 의존성 | ≥ 1건 | PASS — `build.gradle.kts:26,27` |
+| T6: `withReuse(true)` | ≥ 1건 | PASS — `MemberRepositoryTest.java:29` |
+| T7: `Fixtures`/`ObjectMother` | ≥ 1건 | PASS — `MemberFixtures` 전 테스트 파일 사용 |
+| T8: `@MockBean` | 정보성 | Boot 3.3.4 기준 허용 — `MemberControllerTest.java:31` |
+
+codex 리뷰: 블로킹 지적 없음 (committed SKILL.md 보강분 clean).
+
+**2차 회전 판정: PASS — 결함 0건.** 1차(4건) → 2차(0건) 목표 달성.
