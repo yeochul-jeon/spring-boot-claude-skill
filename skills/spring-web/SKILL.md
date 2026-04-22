@@ -95,6 +95,7 @@ Bean Validation 어노테이션 카탈로그·커스텀 validator는 `references
 - [ ] `@RequestBody`에 `Map<String, String>` 또는 raw 타입이 없다 — `*Request` record 사용
 - [ ] `@RequestBody` 파라미터에 `@Valid` 적용
 - [ ] `@RestControllerAdvice`가 등록되어 있고 `ProblemDetail` 반환
+- [ ] 예외 → HTTP 상태 매핑이 `@RestControllerAdvice` 내에 문서화 (`references/exception-handling.md` 매핑표 준수)
 - [ ] Controller 내부에 `@ExceptionHandler` 없음 — `@RestControllerAdvice`로 분리
 - [ ] 에드혹 에러 JSON (`Map<String, String>`) 없음 — `ProblemDetail`로 통일
 - [ ] URL이 명사 복수 + kebab-case (`/members`, `/order-items`)

@@ -59,6 +59,7 @@ Validation
 
 예외 처리
 - [ ] @RestControllerAdvice 등록 + ProblemDetail 반환
+- [ ] 예외 → HTTP 상태 매핑이 @RestControllerAdvice 내에 문서화
 - [ ] Controller 클래스 내부에 @ExceptionHandler 없음
 - [ ] 에드혹 에러 JSON (Map) 없음
 
