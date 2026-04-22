@@ -120,11 +120,41 @@ public class MemberService {
 - [ ] JPA/MyBatis 선택을 사용자에게 확인했는가
 - [ ] `@Transactional`이 Service 계층에만 위치 (Repository·Controller에 없음)
 - [ ] Entity가 Controller 응답 타입으로 직접 노출되지 않음
+- [ ] Service 메서드 반환 타입이 DTO (`*Response`) — Entity를 직접 반환하지 않음
 - [ ] 생성자 주입 + `final` 필드 (필드 주입 없음)
 - [ ] `testcontainers:mysql` (또는 해당 DB) 의존성 포함
 - [ ] JPA 선택 시 연관관계 기본 `fetch = LAZY`, 컬렉션 조회에 fetch join / `@EntityGraph`
 - [ ] MyBatis 선택 시 `<resultMap>` 사용, Java에서 SQL 문자열 조립 없음
 - [ ] `spring-principles` 체크리스트 전 항목 통과
+- [ ] `spring-web` 체크리스트 전 항목 통과 (Controller·예외 처리 포함)
+
+## grep 자동 검증 패턴
+
+체크리스트 실행 전 아래 명령으로 명백한 위반을 빠르게 탐지한다.
+`<SRC>` 는 프로젝트의 `src/main/java` 절대 경로.
+
+```bash
+# P1: @Transactional 경계 위반 — Controller/Repository에 위치 (0건이어야 PASS)
+grep -rn "@Transactional" <SRC>/*/controller/ <SRC>/*/repository/
+
+# P3: EAGER fetch 명시 (0건이어야 PASS)
+grep -rn "FetchType.EAGER" <SRC>/*/domain/
+
+# P5/K: Service가 Entity를 직접 반환 (0건이어야 PASS)
+# 도메인 엔티티 클래스명을 실제 프로젝트에 맞게 수정
+grep -rn "public Order\b\|public Member\b\|public Product\b\|public User\b" <SRC>/*/service/
+
+# P7: TestContainers 의존성 확인 (1건 이상이어야 PASS)
+grep -n "testcontainers" build.gradle.kts   # 0건이면 FAIL
+
+# P8: Service 클래스 레벨 readOnly 적용 확인
+grep -rn "@Transactional(readOnly" <SRC>/*/service/   # 없으면 확인 필요
+
+# 연관관계 fetch 설정 수동 확인 (fetch = LAZY 누락 여부)
+grep -rn "@OneToMany\|@ManyToOne\|@OneToOne\|@ManyToMany" <SRC>/*/domain/
+```
+
+결과가 있으면 `references/` 해당 파일의 Before→After 패턴을 적용한다.
 
 ## references/ 목록
 
