@@ -5,6 +5,23 @@
 
 ---
 
+## 0) Boot ↔ Gradle 최소 버전 호환표
+
+| Spring Boot | 최소 Gradle | 비고 |
+|-------------|-------------|------|
+| 3.x | 7.5+ | Gradle 7.5.1 로컬 설치로 충분 |
+| 4.x | 8.4+ | `gradle wrapper --gradle-version 8.13` 등으로 업그레이드 |
+
+> Gradle wrapper 는 현행 안정판을 권장한다. 고정 버전은 기입하지 않는다.
+> 최신 안정판 확인: `gradle --version` (로컬 설치 기준) 또는 [gradle.org/releases](https://gradle.org/releases/).
+
+fallback scaffold(§2-c) 또는 wrapper 갱신이 필요할 때:
+```bash
+cd /absolute/path/to/project && gradle wrapper --gradle-version <현행 안정판>
+```
+
+---
+
 ## 1) 플러그인 선언 순서
 
 ```kotlin

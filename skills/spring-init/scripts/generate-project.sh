@@ -14,7 +14,7 @@ BOOT_VERSION=$(echo "$VERSIONS" | jq -r .bootVersion)
 TMP=$(mktemp -d)
 trap "rm -rf $TMP" EXIT
 
-PKG_NAME="com.example.$(echo "$ARTIFACT" | tr -d '-_')"
+PKG_NAME="com.example.$(echo "$ARTIFACT" | sed 's/[-_]//g')"
 
 curl -sfL "https://start.spring.io/starter.zip" \
   -d "type=gradle-project-kotlin" \

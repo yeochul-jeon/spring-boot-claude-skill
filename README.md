@@ -131,6 +131,7 @@ Claude 에게 입력:
 | 회고 #8 보안 회귀 가이드 | `tests/regression-8-security-rest-api.md` |
 | 회고 #9 아키텍처 인터뷰 회귀 가이드 | `tests/regression-9-architecture-interview.md` |
 | 회고 #10 Initializr fallback 회귀 가이드 | `tests/regression-10-initializr-fallback.md` |
+| 회고 #11 Fallback 빌드 가능성 회귀 가이드 | `tests/regression-11-fallback-buildability.md` |
 | 수동 테스트 환경 설정 | `tests/manual-test-setup.md` |
 
 ---
