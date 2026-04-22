@@ -35,8 +35,20 @@ echo "=== [W3] Controller @ExceptionHandler ===" && grep -rn "@ExceptionHandler"
 # W4: 에드혹 에러 Map (0건이어야 PASS)
 echo "=== [W4] 에드혹 에러 Map ===" && grep -rn "Map<String.*String>.*error\|put.*\"error\"\|new HashMap" $SRC/*/controller/ || echo "PASS"
 
-# W5a: @Valid 없는 @RequestBody
-echo "=== [W5a] @Valid 미적용 ===" && grep -rn "@RequestBody" $SRC/*/controller/ | grep -v "@Valid" || echo "PASS"
+# W5a: @Valid 없는 @RequestBody (multi-line aware — retro #21 보강)
+# `grep -rn ... | grep -v "@Valid"` 는 line-oriented 라 multi-line 선언
+# (e.g. `@RequestBody\n    @Valid FooReq req`) 에서 false-positive 노이즈.
+# 파일 단위로 개행을 공백으로 치환 후 파라미터 단위로 절단해서 탐지한다.
+echo "=== [W5a] @Valid 미적용 (multi-line aware) ==="
+W5A_MISS=""
+for f in $(find $SRC -path '*/controller/*.java' 2>/dev/null); do
+  HITS=$(tr '\n' ' ' < "$f" | grep -oE '@RequestBody[^,)]{0,200}[,)]' | grep -v '@Valid')
+  if [ -n "$HITS" ]; then
+    printf '%s:\n%s\n' "$f" "$HITS"
+    W5A_MISS="yes"
+  fi
+done
+[ -z "$W5A_MISS" ] && echo "PASS"
 
 # W5b: @RequestBody에 Map 사용 (0건이어야 PASS)
 echo "=== [W5b] @RequestBody Map ===" && grep -rn "@RequestBody Map<" $SRC/*/controller/ || echo "PASS"

@@ -93,7 +93,7 @@ Bean Validation 어노테이션 카탈로그·커스텀 validator는 `references
 
 - [ ] Controller 메서드의 반환 타입이 DTO (`*Response` 또는 `ResponseEntity<*Response>`)
 - [ ] `@RequestBody`에 `Map<String, String>` 또는 raw 타입이 없다 — `*Request` record 사용
-- [ ] `@RequestBody` 파라미터에 `@Valid` 적용
+- [ ] `@RequestBody` 파라미터에 `@Valid` 적용 (권장 스타일: `@RequestBody @Valid` 를 한 줄에 함께 선언)
 - [ ] `@RestControllerAdvice`가 등록되어 있고 `ProblemDetail` 반환
 - [ ] 예외 → HTTP 상태 매핑이 `@RestControllerAdvice` 내에 문서화 (`references/exception-handling.md` 매핑표 준수)
 - [ ] Controller 내부에 `@ExceptionHandler` 없음 — `@RestControllerAdvice`로 분리
@@ -119,8 +119,16 @@ grep -rn "@ExceptionHandler" <SRC>/*/controller/
 # W4: ProblemDetail 미사용 — 에드혹 에러 Map (0건이어야 PASS)
 grep -rn "Map<String.*String>.*error\|put.*\"error\"\|new HashMap" <SRC>/*/controller/
 
-# W5a: @Valid 없는 @RequestBody (출력이 있으면 확인 필요)
-grep -rn "@RequestBody" <SRC>/*/controller/ | grep -v "@Valid"
+# W5a: @Valid 없는 @RequestBody (multi-line 선언 고려)
+# 단순 `grep -rn ... | grep -v "@Valid"` 는 `@RequestBody` 와 `@Valid`
+# 가 별개 라인일 때 false-positive 를 낸다. 파일 단위로 줄바꿈을 공백으로
+# 치환 후 파라미터(`,` 또는 `)` 로 끝나는 구간)를 추출해 검사한다.
+for f in $(find <SRC> -path '*/controller/*.java' 2>/dev/null); do
+  tr '\n' ' ' < "$f" \
+    | grep -oE '@RequestBody[^,)]{0,200}[,)]' \
+    | grep -v '@Valid' \
+    && echo "  ↑ in $f"
+done
 
 # W5b: @RequestBody에 Map 사용 (0건이어야 PASS)
 grep -rn "@RequestBody Map<" <SRC>/*/controller/

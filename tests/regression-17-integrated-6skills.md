@@ -161,6 +161,7 @@ grep -n "T8a\|T8b" $TESTS/regression-16-testing-checklist.md || echo "FAIL"
 | 2026-04-22 | §B test-retro18-v2 T1~T7 | PASS | retro #18 2차 회전 상태 유지 — 세부 §4b |
 | 2026-04-22 | §B test-retro18-v2 T8a/T8b | FAIL (예상) | retro #19 이전 sandbox (Boot 3.3.4) — 미교체 예상 결과 |
 | 2026-04-22 | §C @MockitoBean 마이그레이션 | PASS | @MockBean 0건; @MockitoBean 11건 |
+| 2026-04-22 | W5a multi-line grep 결함 (소급) | INFO | retro #21 에서 해소 — line-oriented grep 이 multi-line 파라미터 선언에서 false-positive 노이즈 발생. 실측 실패 사례 0건 (latent) 이었으나 `tr + grep -oE` 기반 파라미터 단위 스캐너로 교체 |
 
 ### §4a — §A meta-regression 세부
 
