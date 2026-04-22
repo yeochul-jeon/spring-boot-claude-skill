@@ -138,7 +138,8 @@ metadata API 는 성공했는데 `/starter.zip` 만 장애일 때 한해 다음 
    ```bash
    cd /absolute/path/to/project && gradle wrapper --gradle-version <현행 안정판>
    ```
-   - Boot 4.x 프로젝트라면 Gradle 8.4 이상을 지정한다.
+   - Boot 4.x 프로젝트라면 Gradle **8.14 이상(또는 9.x)** 을 지정한다.
+     빌드 실패 시 `Spring Boot plugin requires Gradle ...` 메시지의 요구 버전 이상으로 재지정한다.
 5. 사용자에게 "zip API 장애로 수동 scaffold 적용, Boot 버전은 metadata 조회값 사용" 을 명시 보고
 
 #### 2-d. 중단 프로토콜
@@ -175,7 +176,7 @@ zip 으로 생성된 프로젝트에는 wrapper 가 포함되어 있다.
 cd /absolute/path/to/project && gradle wrapper --gradle-version <현행 안정판>
 ```
 
-- Boot 4.x → Gradle **8.4 이상** 필요
+- Boot 4.x → Gradle **8.14+ 또는 9.x** 필요
 - Boot 3.x → Gradle **7.5 이상** 필요
 
 ### 4. 패키지 구조 적용

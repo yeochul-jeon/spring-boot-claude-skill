@@ -70,7 +70,7 @@ claude
 - [ ] 스크립트 실행 실패 없음
 
 **결함 D — Gradle wrapper**
-- [ ] Boot 4.x 시 Gradle 8.4+ wrapper 로 생성 또는 갱신됨
+- [ ] Boot 4.x 시 Gradle 8.14+ (또는 9.x) wrapper 로 생성 또는 갱신됨
 - [ ] `./gradlew build` 성공
 
 **결함 E — CWD 중첩**

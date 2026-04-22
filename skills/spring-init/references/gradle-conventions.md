@@ -10,10 +10,14 @@
 | Spring Boot | 최소 Gradle | 비고 |
 |-------------|-------------|------|
 | 3.x | 7.5+ | Gradle 7.5.1 로컬 설치로 충분 |
-| 4.x | 8.4+ | `gradle wrapper --gradle-version 8.13` 등으로 업그레이드 |
+| 4.x | 8.14+ 또는 9.x | `gradle wrapper --gradle-version 8.14.3` 등 현행 안정판으로 업그레이드 |
 
 > Gradle wrapper 는 현행 안정판을 권장한다. 고정 버전은 기입하지 않는다.
 > 최신 안정판 확인: `gradle --version` (로컬 설치 기준) 또는 [gradle.org/releases](https://gradle.org/releases/).
+>
+> **주의**: 이 표는 Boot 4.0.5 / Gradle 8.14 기준으로 작성되었다. Boot 패치 릴리스에서
+> 최소 Gradle 이 상향될 수 있으므로 빌드 실패 시 `Spring Boot plugin requires Gradle ...`
+> 오류 메시지에 명시된 요구 버전을 우선 따른다.
 
 fallback scaffold(§2-c) 또는 wrapper 갱신이 필요할 때:
 ```bash
