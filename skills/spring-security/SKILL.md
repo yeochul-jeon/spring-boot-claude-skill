@@ -1,9 +1,10 @@
 ---
 name: spring-security
 description: Use when configuring authentication and authorization in
-  Spring Boot. Trigger on "로그인", "인증", "권한", "JWT", "세션". The skill
-  asks session-based vs JWT first, then configures SecurityFilterChain,
-  password encoding, and CORS appropriately.
+  Spring Boot. Trigger on "로그인", "인증", "권한", "JWT", "세션", "REST API 로그인".
+  The skill asks session-based vs JWT first, then configures SecurityFilterChain,
+  password encoding, and CORS appropriately. For REST API session login, always
+  includes HttpStatusEntryPoint(UNAUTHORIZED) to return 401 instead of 302.
 ---
 
 # Spring Security
@@ -132,6 +133,7 @@ public CorsConfigurationSource corsConfigurationSource() {
 - [ ] 세션 선택 시: 세션 고정 공격 방어 (`sessionFixation().changeSessionId()`)
 - [ ] 공개 엔드포인트 (`/api/v1/auth/**`) `permitAll()` 명시
 - [ ] CSRF: JWT는 disable, 세션은 운영 요구에 따라 활성화
+- [ ] REST API면 `HttpStatusEntryPoint(UNAUTHORIZED)` 등록 — 미인증 접근 302→401 (`session-auth.md` §6)
 - [ ] `spring-security-test` 의존성 포함
 - [ ] `spring-principles` 체크리스트 전 항목 통과
 

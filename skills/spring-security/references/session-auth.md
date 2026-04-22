@@ -26,6 +26,8 @@ public class SecurityConfig {
                 .maximumSessions(1)                           // 동시 로그인 제한 (선택)
                 .maxSessionsPreventsLogin(false)              // true: 신규 로그인 차단, false: 기존 세션 만료
             )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))  // REST: 302→401. 상세 §6
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
