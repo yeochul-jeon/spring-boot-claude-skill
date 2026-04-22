@@ -136,6 +136,46 @@ public CorsConfigurationSource corsConfigurationSource() {
 - [ ] REST API면 `HttpStatusEntryPoint(UNAUTHORIZED)` 등록 — 미인증 접근 302→401 (`session-auth.md` §6)
 - [ ] `spring-security-test` 의존성 포함
 - [ ] `spring-principles` 체크리스트 전 항목 통과
+- [ ] `spring-web` 체크리스트 전 항목 통과 (Controller·예외 처리·Request DTO 포함)
+
+## grep 자동 검증 패턴
+
+체크리스트 실행 전 아래 명령으로 명백한 위반을 빠르게 탐지한다.
+`<SRC>` 는 프로젝트의 `src/main/java` 절대 경로.
+
+```bash
+# S1: WebSecurityConfigurerAdapter 사용 금지 (0건이어야 PASS)
+grep -rn "WebSecurityConfigurerAdapter" <SRC>/
+
+# S2: 평문 저장 / NoOp 인코더 금지 (0건이어야 PASS)
+grep -rn "NoOpPasswordEncoder" <SRC>/
+
+# S3: DelegatingPasswordEncoder 사용 확인 (1건 이상이어야 PASS)
+grep -rn "DelegatingPasswordEncoder\|PasswordEncoderFactories" <SRC>/   # 0건이면 BCrypt 직접 사용 → 검토 필요
+
+# S4: 세션 고정 공격 방어 (세션 경로라면 1건 이상이어야 PASS)
+grep -rn "sessionFixation\|changeSessionId" <SRC>/   # 없으면 FAIL
+
+# S5: CorsConfigurationSource Bean 등록 확인 (1건 이상이어야 PASS)
+grep -rn "CorsConfigurationSource" <SRC>/   # 없으면 FAIL
+
+# S6: WebMvcConfigurer.addCorsMappings 사용 금지 (0건이어야 PASS)
+grep -rn "addCorsMappings" <SRC>/
+
+# S7: HttpStatusEntryPoint 등록 (REST API라면 1건 이상이어야 PASS)
+grep -rn "HttpStatusEntryPoint" <SRC>/   # 없으면 302→401 미적용 확인 필요
+
+# S8: wildcard origin + credentials 조합 금지 (0건이어야 PASS)
+grep -rn 'allowedOrigins.*"\*"' <SRC>/
+
+# W2: @RestControllerAdvice 존재 확인 (1건 이상이어야 PASS)
+grep -rn "@RestControllerAdvice" <SRC>/   # 없으면 FAIL
+
+# W_login: @RequestBody에 Map 사용 금지 (0건이어야 PASS)
+grep -rn "@RequestBody.*Map" <SRC>/*/controller/
+```
+
+결과가 있으면 `references/` 해당 파일의 Before→After 패턴을 적용한다.
 
 ## references/ 목록
 
