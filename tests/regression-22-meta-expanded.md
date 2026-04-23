@@ -200,11 +200,11 @@ echo "(위 결과 1건 이상 → PASS)"
 # spring-batch (확장: A7a~A7d)
 # ─────────────────────────────────────────
 
-# A7a: Boot 버전 하드코딩 없음 (latestVersion placeholder / shedlock 외부 라이브러리 허용)
+# A7a: Spring Boot 버전 하드코딩 없음 — Boot 좌표만 타겟팅 (외부 라이브러리 버전은 자연 통과)
 echo "=== [A7a] spring-batch Boot 버전 하드코딩 ==="
-grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-batch/ \
-  | grep -v "latestVersion\|shedlock\|jjwt\|mapstruct\|testcontainers\|//\|#\|gradle" \
-  || echo "PASS"
+UNSAFE=$(grep -rnE 'spring-boot.*[0-9]+\.[0-9]+\.[0-9]+|springframework\.boot.*[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-batch/ \
+  | grep -v "latestVersion\|//\|#")
+[ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "FAIL: Spring Boot 버전 하드코딩 발견" || echo "PASS"
 
 # A7b: JobBuilder/StepBuilder DSL 참조 (1건 이상이어야 PASS)
 echo "=== [A7b] spring-batch JobBuilder/StepBuilder ==="
@@ -228,11 +228,11 @@ echo "(위 결과 1건 이상 → PASS)"
 # spring-cache (확장: A8a~A8d)
 # ─────────────────────────────────────────
 
-# A8a: Boot 버전 하드코딩 없음 (caffeine/redis 외부 라이브러리 허용)
+# A8a: Spring Boot 버전 하드코딩 없음 — Boot 좌표만 타겟팅
 echo "=== [A8a] spring-cache Boot 버전 하드코딩 ==="
-grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-cache/ \
-  | grep -v "latestVersion\|caffeine\|redis\|//\|#" \
-  || echo "PASS"
+UNSAFE=$(grep -rnE 'spring-boot.*[0-9]+\.[0-9]+\.[0-9]+|springframework\.boot.*[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-cache/ \
+  | grep -v "latestVersion\|//\|#")
+[ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "FAIL: Spring Boot 버전 하드코딩 발견" || echo "PASS"
 
 # A8b: @EnableCaching 참조 (1건 이상이어야 PASS)
 echo "=== [A8b] spring-cache @EnableCaching ==="
@@ -253,16 +253,16 @@ echo "(위 결과 1건 이상 → PASS)"
 # spring-observability (확장: A9a~A9d)
 # ─────────────────────────────────────────
 
-# A9a: Boot 버전 하드코딩 없음 (logstash/micrometer/otel 외부 라이브러리 허용)
+# A9a: Spring Boot 버전 하드코딩 없음 — Boot 좌표만 타겟팅
 echo "=== [A9a] spring-observability Boot 버전 하드코딩 ==="
-grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-observability/ \
-  | grep -v "latestVersion\|logstash\|micrometer\|otel\|opentelemetry\|//\|#" \
-  || echo "PASS"
+UNSAFE=$(grep -rnE 'spring-boot.*[0-9]+\.[0-9]+\.[0-9]+|springframework\.boot.*[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-observability/ \
+  | grep -v "latestVersion\|//\|#")
+[ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "FAIL: Spring Boot 버전 하드코딩 발견" || echo "PASS"
 
-# A9b: Actuator include "*" wildcard 노출 예시 (안티패턴 맥락 외 0건이어야 PASS)
+# A9b: Actuator include wildcard 노출 (YAML 쌍/단따옴표 + properties 비인용 = 세 변형 탐지)
 echo "=== [A9b] spring-observability Actuator wildcard 노출 ==="
-grep -rn 'include.*"\*"\|include.*'"'"'\*'"'" $SKILLS/spring-observability/ \
-  | grep -v "금지\|안티패턴\|Before\|BAD\|WRONG\|grep -rn\|- \[ \]" \
+grep -rnE 'include[ =:"'"'"']*\*' $SKILLS/spring-observability/ \
+  | grep -v "금지\|안티패턴\|Before\|BAD\|WRONG\|grep -rn\|- \[ \]\|변형 모두\|세 변형" \
   || echo "PASS"
 
 # A9c: LogstashEncoder 또는 logging.structured.format 참조 (1건 이상이어야 PASS)
@@ -271,9 +271,9 @@ grep -rn "LogstashEncoder\|logging\.structured\.format" $SKILLS/spring-observabi
   | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
-# A9d: sampling.probability 또는 sampling: 참조 (1건 이상이어야 PASS)
-echo "=== [A9d] spring-observability sampling.probability ==="
-grep -rn "sampling\.probability\|sampling:" $SKILLS/spring-observability/ \
+# A9d: probability 키 참조 (flat `sampling.probability` + YAML 중첩 `probability:` 모두 탐지)
+echo "=== [A9d] spring-observability sampling probability ==="
+grep -rn "sampling\.probability\|probability:" $SKILLS/spring-observability/ \
   | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
@@ -281,25 +281,25 @@ echo "(위 결과 1건 이상 → PASS)"
 # spring-async (확장: A10a~A10e)
 # ─────────────────────────────────────────
 
-# A10a: Boot 버전 하드코딩 없음 (shedlock 외부 라이브러리 허용)
+# A10a: Spring Boot 버전 하드코딩 없음 — Boot 좌표만 타겟팅
 echo "=== [A10a] spring-async Boot 버전 하드코딩 ==="
-grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-async/ \
-  | grep -v "latestVersion\|shedlock\|//\|#" \
-  || echo "PASS"
+UNSAFE=$(grep -rnE 'spring-boot.*[0-9]+\.[0-9]+\.[0-9]+|springframework\.boot.*[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-async/ \
+  | grep -v "latestVersion\|//\|#")
+[ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "FAIL: Spring Boot 버전 하드코딩 발견" || echo "PASS"
 
-# A10b: SimpleAsyncTaskExecutor (안티패턴/echo 맥락 외 0건이어야 PASS)
-# echo "=== [AS1]..." 라인은 grep 명령 레이블 — 허용 맥락
+# A10b: SimpleAsyncTaskExecutor (안티패턴/grep 레이블 맥락 외 0건이어야 PASS)
+# `echo "=== [AS1] ..."` 라인은 grep 명령 레이블 — `=== [AS` 앵커로 좁게 제외
 echo "=== [A10b] spring-async SimpleAsyncTaskExecutor ==="
 grep -rn "SimpleAsyncTaskExecutor" $SKILLS/spring-async/ \
-  | grep -v "절대 원칙\|사용하지 않는다\|사용 금지\|# AS1\|grep -rn\|echo\|- \[ \]\|banned\|// 금지" \
+  | grep -v "절대 원칙\|사용하지 않는다\|사용 금지\|# AS1\|grep -rn\|=== \[AS\|- \[ \]\|banned\|// 금지" \
   || echo "PASS"
 
 # A10c: new Thread( / Executors.newCachedThreadPool (bash 주석 설명 맥락 외 0건이어야 PASS)
-# 라인 142 = `# new Thread( — 원시 스레드 생성...` bash 주석 설명 — 허용 맥락
+# `# new Thread( — 원시 스레드...` 는 bash 주석 — grep -rn 출력 `:N:# ` 앵커로 좁게 제외
 echo "=== [A10c] spring-async 비관리 스레드 직접 생성 ==="
 grep -rn "new Thread(\|Executors\.newCachedThreadPool\|Executors\.newSingleThreadExecutor" \
   $SKILLS/spring-async/ \
-  | grep -v "금지\|안티패턴\|// \|grep -rn\|원시 스레드\|무한 스레드풀\|UNSAFE\|- \[ \]\|WARN" \
+  | grep -Ev "금지|안티패턴|// |grep -rn|UNSAFE|- \[ \]|WARN|:[0-9]+:[[:space:]]*# " \
   || echo "PASS"
 
 # A10d: @EnableAsync 참조 (1건 이상이어야 PASS)
@@ -343,6 +343,7 @@ retro #14~#17 은 BASELINE sandbox 만 생성되고 2차 회전(SKILL 로드 후
 | 2026-04-23 | §A 확장 — spring-cache (A8a~A8d) | PASS | 버전 하드코딩 0건; @EnableCaching·unless·TTL 참조 각 1건+ |
 | 2026-04-23 | §A 확장 — spring-observability (A9a~A9d) | PASS | 버전 하드코딩 0건; wildcard 0건; LogstashEncoder·sampling 참조 각 1건+ |
 | 2026-04-23 | §A 확장 — spring-async (A10a~A10e) | PASS | 버전 하드코딩 0건; SimpleAsyncTaskExecutor·new Thread( 모두 허용 맥락; @EnableAsync·exceptionally 참조 각 1건+ |
+| 2026-04-23 | §A 보강 Phase D2 (retro #27 codex 리뷰 반영, 8건) | PASS | A7a/A8a/A9a/A10a Boot-only 인버트; A9b properties 비인용 `include=*` 탐지; A9d `probability:` 강제; A10b `=== [AS` 앵커·A10c bash 주석 앵커 교체 |
 
 ### 자기참조 분석 세부 (허용 맥락 확인)
 
