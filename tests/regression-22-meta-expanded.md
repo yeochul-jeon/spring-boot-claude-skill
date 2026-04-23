@@ -206,6 +206,9 @@ UNSAFE=$(grep -rnE 'spring-boot.*[0-9]+\.[0-9]+\.[0-9]+|springframework\.boot.*[
   | grep -v "latestVersion\|//\|#")
 [ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "FAIL: Spring Boot 버전 하드코딩 발견" || echo "PASS"
 
+# A7b/A7c: 존재-확인 규칙 — 목차/다이어그램도 통과 가능한 구조적 한계 (known-limitation).
+#          실질 위반은 BASELINE empirical 사이클(retro #23)이 커버.
+
 # A7b: JobBuilder/StepBuilder DSL 참조 (1건 이상이어야 PASS)
 echo "=== [A7b] spring-batch JobBuilder/StepBuilder ==="
 grep -rn "JobBuilder\|StepBuilder" $SKILLS/spring-batch/ | grep -v "grep -rn" | head -3
@@ -218,9 +221,9 @@ grep -rn "ItemReader\|JdbcCursorItemReader\|JpaPagingItemReader\|RepositoryItemR
 echo "(위 결과 1건 이상 → PASS)"
 
 # A7d: chunk() 호출 참조 (1건 이상이어야 PASS)
-# 주의: .<T,R>chunk(...) type witness 구문은 >chunk( 형식 — "chunk(" 패턴으로 탐지
+# 주의: .<T,R>chunk(...) type witness + whitespace 변형 대응 — `chunk\s*\(`
 echo "=== [A7d] spring-batch chunk() 참조 ==="
-grep -rn "chunk(" $SKILLS/spring-batch/ \
+grep -rnE "chunk\s*\(" $SKILLS/spring-batch/ \
   | grep -v "grep -rn\|# .*chunk\|chunk size 가\|권장 chunk" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
@@ -234,19 +237,21 @@ UNSAFE=$(grep -rnE 'spring-boot.*[0-9]+\.[0-9]+\.[0-9]+|springframework\.boot.*[
   | grep -v "latestVersion\|//\|#")
 [ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "FAIL: Spring Boot 버전 하드코딩 발견" || echo "PASS"
 
-# A8b: @EnableCaching 참조 (1건 이상이어야 PASS)
+# A8b: @EnableCaching 참조 (FQCN 변형 포함, 1건 이상이어야 PASS)
 echo "=== [A8b] spring-cache @EnableCaching ==="
-grep -rn "@EnableCaching" $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
+grep -rnE "@EnableCaching|springframework\.cache\.annotation\.EnableCaching" \
+  $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
-# A8c: unless 또는 SpEL null 방어 언급 (1건 이상이어야 PASS)
+# A8c: unless 또는 SpEL null 방어 (존재-확인 — disableCachingNullValues 단독 케이스는 known-limitation)
 echo "=== [A8c] spring-cache unless/SpEL null 방어 ==="
 grep -rn "unless\|#result.*null\|== null" $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
-# A8d: TTL 설정 언급 (1건 이상이어야 PASS)
+# A8d: TTL 설정 (@TimeToLive / time-to-live 대체 표현 포함, 1건 이상이어야 PASS)
 echo "=== [A8d] spring-cache TTL ==="
-grep -rn "expireAfterWrite\|entryTtl\|ttl:" $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
+grep -rnE "expireAfterWrite|entryTtl|ttl:|@TimeToLive|time-to-live" \
+  $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
 # ─────────────────────────────────────────
@@ -265,7 +270,8 @@ grep -rnE 'include[ =:"'"'"']*\*' $SKILLS/spring-observability/ \
   | grep -v "금지\|안티패턴\|Before\|BAD\|WRONG\|grep -rn\|- \[ \]\|변형 모두\|세 변형" \
   || echo "PASS"
 
-# A9c: LogstashEncoder 또는 logging.structured.format 참조 (1건 이상이어야 PASS)
+# A9c: LogstashEncoder 또는 logging.structured.format 참조 (존재-확인)
+#      주의: "금지" 같은 부정 문장도 통과 가능 — known-limitation. 실질 검증은 empirical(retro #25).
 echo "=== [A9c] spring-observability LogstashEncoder/structured.format ==="
 grep -rn "LogstashEncoder\|logging\.structured\.format" $SKILLS/spring-observability/ \
   | grep -v "grep -rn" | head -3
@@ -302,14 +308,16 @@ grep -rn "new Thread(\|Executors\.newCachedThreadPool\|Executors\.newSingleThrea
   | grep -Ev "금지|안티패턴|// |grep -rn|UNSAFE|- \[ \]|WARN|:[0-9]+:[[:space:]]*# " \
   || echo "PASS"
 
-# A10d: @EnableAsync 참조 (1건 이상이어야 PASS)
+# A10d: @EnableAsync 참조 (FQCN 변형 포함, 1건 이상이어야 PASS)
 echo "=== [A10d] spring-async @EnableAsync ==="
-grep -rn "@EnableAsync" $SKILLS/spring-async/ | grep -v "grep -rn" | head -3
+grep -rnE "@EnableAsync|springframework\.scheduling\.annotation\.EnableAsync" \
+  $SKILLS/spring-async/ | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
-# A10e: exceptionally/handle 예외 처리 참조 (1건 이상이어야 PASS)
+# A10e: exceptionally/handle/handleAsync 예외 처리 참조 (1건 이상이어야 PASS)
 echo "=== [A10e] spring-async exceptionally/handle ==="
-grep -rn "exceptionally\|\.handle(" $SKILLS/spring-async/ | grep -v "grep -rn" | head -3
+grep -rnE "exceptionally|\.handle\(|handleAsync" $SKILLS/spring-async/ \
+  | grep -v "grep -rn" | head -3
 echo "(위 결과 1건 이상 → PASS)"
 ```
 
@@ -344,6 +352,7 @@ retro #14~#17 은 BASELINE sandbox 만 생성되고 2차 회전(SKILL 로드 후
 | 2026-04-23 | §A 확장 — spring-observability (A9a~A9d) | PASS | 버전 하드코딩 0건; wildcard 0건; LogstashEncoder·sampling 참조 각 1건+ |
 | 2026-04-23 | §A 확장 — spring-async (A10a~A10e) | PASS | 버전 하드코딩 0건; SimpleAsyncTaskExecutor·new Thread( 모두 허용 맥락; @EnableAsync·exceptionally 참조 각 1건+ |
 | 2026-04-23 | §A 보강 Phase D2 (retro #27 codex 리뷰 반영, 8건) | PASS | A7a/A8a/A9a/A10a Boot-only 인버트; A9b properties 비인용 `include=*` 탐지; A9d `probability:` 강제; A10b `=== [AS` 앵커·A10c bash 주석 앵커 교체 |
+| 2026-04-23 | §A 보강 Phase D3 (codex low 5건 + known-limitation 주석 3건) | PASS | A7d `chunk\s*(` whitespace; A8b/A10d FQCN 대체; A8d `@TimeToLive`/`time-to-live`; A10e `handleAsync`; A7b/A7c/A8c/A9c 구조적 한계 주석 |
 
 ### 자기참조 분석 세부 (허용 맥락 확인)
 
