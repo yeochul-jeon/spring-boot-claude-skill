@@ -50,6 +50,20 @@ JobParameters params = new JobParametersBuilder()
 
 ## 5) JobRepository DataSource 분리
 
+**Before — 단일 DataSource (금지):**
+
+```java
+// 금지: 배치 메타 테이블과 도메인 테이블이 같은 DataSource 공유
+// 장애 격리 불가, 도메인 트랜잭션이 배치 메타 기록에 영향
+@Configuration
+public class BatchConfig {
+    private final DataSource dataSource; // 앱·배치 모두 동일 DataSource 사용 — 금지
+    ...
+}
+```
+
+**After — DataSource 분리 (`@BatchDataSource`):**
+
 ```java
 @Configuration
 public class BatchInfraConfig {
@@ -70,3 +84,6 @@ public class BatchInfraConfig {
     }
 }
 ```
+
+> `@BatchDataSource` 는 Spring Batch가 인식하는 한정자(Qualifier).
+> 이 Bean이 있으면 `JobRepository`는 자동으로 batch DataSource를 사용한다.

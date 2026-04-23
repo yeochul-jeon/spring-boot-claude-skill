@@ -108,17 +108,21 @@ public class MemberExportJobConfig {
 
 ```bash
 # B1: chunk size 미설정 — chunk() 호출 없음 (0건이면 수동 확인 필요)
+# 주의: .<T,R>chunk(...) 형식의 type witness 구문도 탐지하도록 [.>]chunk( 패턴 사용
 echo "=== [B1] chunk size 설정 ==="
-grep -rn "\.chunk(" <SRC>/ || echo "WARN: chunk() 호출 없음 — Tasklet 전용 여부 확인"
+grep -rn "chunk(" <SRC>/ | grep -v "//\|chunkSize\|CHUNK_SIZE\s*=" || echo "WARN: chunk() 호출 없음 — Tasklet 전용 여부 확인"
 
 # B2: @Transactional이 Batch Step 클래스에 직접 선언 (0건이어야 PASS)
 echo "=== [B2] Step 클래스 @Transactional ==="
-grep -rn "@Transactional" <SRC>/*/batch/step/ <SRC>/*/batch/reader/ <SRC>/*/batch/writer/ 2>/dev/null || echo "PASS"
+find <SRC> \( -path "*/batch/step/*.java" -o -path "*/batch/reader/*.java" -o -path "*/batch/writer/*.java" \) -print0 2>/dev/null \
+  | xargs -0 grep -ln "@Transactional" 2>/dev/null || echo "PASS"
 
-# B3: JobRepository 별도 DataSource 설정 (1건 이상이어야 PASS)
+# B3: JobRepository DataSource 분리 — @BatchDataSource Bean 또는 별도 설정 필요 (1건 이상이어야 PASS)
+# 주의: JobRepository import 만으로 PASS 판정하지 않음 — 실제 분리 Bean을 확인해야 함
 echo "=== [B3] JobRepository DataSource 분리 ==="
-grep -rn "JobRepository\|BatchDataSource\|batchDataSource" <SRC>/../resources/ <SRC>/ 2>/dev/null | head -5
-echo "(위 결과 1건 이상 → PASS)"
+grep -rn "@BatchDataSource\|batchDataSource.*DataSource\|EnableJdbcJobRepository\|DefaultBatchConfiguration\|BatchDataSourceScriptDatabaseInitializer" \
+  "<SRC>/../resources/" "<SRC>/" 2>/dev/null | head -5 \
+  || echo "FAIL: 별도 BatchDataSource Bean 없음 — references/job-design.md DataSource 분리 패턴 참조"
 
 # B4: faultTolerant 설정 확인
 echo "=== [B4] faultTolerant 설정 ==="
