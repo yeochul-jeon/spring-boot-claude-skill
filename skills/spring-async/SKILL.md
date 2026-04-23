@@ -138,25 +138,37 @@ public class DataSyncScheduler {
 `<SRC>` 는 프로젝트의 `src/main/java` 절대 경로.
 
 ```bash
-# AS1: SimpleAsyncTaskExecutor 사용 (0건이어야 PASS)
-echo "=== [AS1] SimpleAsyncTaskExecutor ==="
+# AS1: SimpleAsyncTaskExecutor 또는 비관리 스레드 직접 생성 (0건이어야 PASS)
+# new Thread( — 원시 스레드 생성; Executors.newCachedThreadPool — 무한 스레드풀
+# 주의: head -3 은 빈 입력에서도 exit 0 → UNSAFE 변수로 출력 여부를 판별해야 함
+echo "=== [AS1] SimpleAsyncTaskExecutor / 비관리 스레드 ==="
 grep -rn "SimpleAsyncTaskExecutor" <SRC>/ | grep -v "//\|import\|grep" || echo "PASS"
+UNSAFE=$(grep -rn "new Thread(\|Executors\.newCachedThreadPool\|Executors\.newSingleThreadExecutor" <SRC>/ \
+  | grep -v "//\|import\|ThreadPoolTaskExecutor\|ThreadPoolExecutor")
+[ -n "$UNSAFE" ] && echo "$UNSAFE" && echo "WARN: 비관리 스레드 직접 생성 — ThreadPoolTaskExecutor 또는 virtual threads 사용 권장" || echo "PASS"
 
 # AS2: @EnableAsync 설정 (1건 이상이어야 PASS)
 echo "=== [AS2] @EnableAsync ==="
 grep -rn "@EnableAsync" <SRC>/ || echo "FAIL: @EnableAsync 없음"
 
 # AS3: @Async 메서드 반환 타입 확인 (void/CompletableFuture 외 타입 경고)
+# 주의: @Async 뒤에 다른 어노테이션이 오면 -A1 이 해당 어노테이션을 반환 타입으로 오인할 수 있음
+# → 출력이 있으면 반환 타입인지 어노테이션인지 수동 확인
 echo "=== [AS3] @Async 반환 타입 ==="
 grep -rn -A1 "@Async" <SRC>/ | grep -v "@Async\|//\|#\|--" | grep -v "void\|CompletableFuture" | head -5
-echo "(위 결과 있으면 반환 타입 수동 확인 필요)"
+echo "MANUAL: 위 결과가 반환 타입인지 중간 어노테이션인지 수동 확인 필요"
 
 # AS4: @Scheduled 존재 시 잠금 설정 확인
 echo "=== [AS4] @Scheduled 잠금 ==="
 SCHED_COUNT=$(grep -rn "@Scheduled" <SRC>/ | grep -v "//\|import" | wc -l | tr -d ' ')
 LOCK_COUNT=$(grep -rn "@SchedulerLock\|ShedLock" <SRC>/ | grep -v "//\|import" | wc -l | tr -d ' ')
 echo "@Scheduled: $SCHED_COUNT, @SchedulerLock: $LOCK_COUNT"
-[ "$SCHED_COUNT" -gt 0 ] && [ "$LOCK_COUNT" -eq 0 ] && echo "WARN: @Scheduled 있으나 잠금 없음"
+[ "$SCHED_COUNT" -gt 0 ] && [ "$LOCK_COUNT" -eq 0 ] && echo "WARN: @Scheduled 있으나 잠금 없음 — fixedDelay 단일 인스턴스인 경우는 허용 (수동 확인)"
+
+# AS5: CompletableFuture 예외 처리 (1건 이상이어야 PASS — @Async 호출 측)
+echo "=== [AS5] CompletableFuture 예외 처리 ==="
+grep -rn "exceptionally\|\.handle(" <SRC>/ | grep -v "//\|import" | head -5
+echo "MANUAL: @Async 메서드 호출마다 exceptionally 또는 handle 체인 여부 수동 확인"
 ```
 
 ## references/ 목록
