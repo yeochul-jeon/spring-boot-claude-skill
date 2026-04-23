@@ -146,10 +146,15 @@ echo "(위 결과 있으면 key 표현식 확인 필요)"
 echo "=== [C2] @EnableCaching ==="
 grep -rn "@EnableCaching" <SRC>/ || echo "FAIL: @EnableCaching 없음"
 
-# C3: TTL 설정 확인 (1건 이상이어야 PASS)
+# C3: TTL 설정 확인 (수동 확인 필수)
+# Caffeine: expireAfterWrite(TTL)/expireAfterAccess(TTI), Redis Java: entryTtl/@TimeToLive
+# Redis yml: spring.cache.redis.time-to-live → resources/ 도 스캔
+# 주의: grep은 TTL 문자열 존재만 확인함 — 모든 캐시에 TTL이 적용되는지는 수동으로 확인해야 함
+# (기본 CacheManager TTL 이 모든 @Cacheable 캐시에 적용되는지, 또는 캐시별 TTL 이 빠진 캐시가 없는지)
 echo "=== [C3] TTL 설정 ==="
-grep -rn "expireAfterWrite\|entryTtl\|TimeToLive\|ttl" <SRC>/ | head -5
-echo "(위 결과 1건 이상 → PASS)"
+grep -rn "expireAfterWrite\|expireAfterAccess\|entryTtl\|TimeToLive" <SRC>/ 2>/dev/null | head -5
+grep -rn "time-to-live" <SRC>/../resources/ 2>/dev/null | head -3
+echo "MANUAL: 0건이면 FAIL(TTL 없음); 1건 이상이면 @Cacheable 캐시 전체에 TTL 적용 여부를 수동으로 확인"
 
 # C4: null 캐시 방지 설정 (1건 이상이어야 PASS)
 echo "=== [C4] null 캐시 방지 ==="
