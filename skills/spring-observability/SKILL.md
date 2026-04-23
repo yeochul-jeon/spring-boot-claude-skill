@@ -149,27 +149,32 @@ public class CorrelationIdFilter implements Filter {
 
 ```bash
 # O1: Actuator wildcard 노출 (0건이어야 PASS)
+# YAML 큰따옴표("*") · 작은따옴표('*') · properties(include=*) 세 변형 모두 탐지
 echo "=== [O1] Actuator wildcard 노출 ==="
-grep -rn 'include.*"\*"\|include: "\*"' <RES>/ || echo "PASS"
+grep -rn 'include.*"\*"\|include: "\*"\|include.*'"'"'\*'"'"'\|include=\*' <RES>/ || echo "PASS"
 
-# O2: @EnableCaching 아닌 MeterRegistry 직접 구현 확인 (수동)
+# O2: MeterRegistry 직접 구현 확인 (수동)
 echo "=== [O2] MeterRegistry 사용 ==="
 grep -rn "MeterRegistry" <SRC>/ | grep -v "//\|import" | head -5
+echo "MANUAL: io.prometheus.client 직접 import 없는지 확인"
 
 # O3: CorrelationId / MDC 전파 필터 존재 (1건 이상이어야 PASS)
 echo "=== [O3] Correlation ID 필터 ==="
 grep -rn "CorrelationId\|correlationId\|MDC.put" <SRC>/ | head -3
-echo "(위 결과 1건 이상 → PASS)"
+echo "MANUAL: Filter/OncePerRequestFilter 구현체 내부에서 MDC.put 호출인지 확인"
 
 # O4: Structured logging encoder 설정 (1건 이상이어야 PASS)
+# LogstashEncoder(logback-json) · Boot 3.4+ logging.structured.format 두 경로 탐지
 echo "=== [O4] Structured logging ==="
-grep -rn "LogstashEncoder\|logstash-logback\|StructuredLogging" <SRC>/../resources/ 2>/dev/null | head -3
+grep -rn "LogstashEncoder\|logstash-logback\|StructuredLogging\|logging\.structured\.format" <SRC>/../resources/ 2>/dev/null | head -3
 echo "(위 결과 1건 이상 → PASS)"
 
 # O5: tracing sampling 설정 (1건 이상이어야 PASS)
+# 주의: YAML은 sampling:·probability: 두 줄로 분리 — 두 줄 모두 탐지해야 실제 설정 확인 가능
+# properties 포맷은 management.tracing.sampling.probability=N.N 한 줄로 탐지 가능
 echo "=== [O5] Tracing sampling ==="
-grep -rn "sampling.probability\|tracing" <RES>/ | head -3
-echo "(위 결과 1건 이상 → PASS)"
+grep -rn "sampling\.probability\|sampling:" <RES>/ | head -5
+echo "MANUAL: YAML 사용 시 'probability:' 값이 명시되어 있는지 수동 확인 필수"
 ```
 
 ## references/ 목록
