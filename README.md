@@ -30,11 +30,17 @@ Claude Code 의 Skill 메커니즘을 활용해 프로젝트마다 동적으로 
 ### 스킬 참조 관계
 
 ```
-spring-init ──▶ spring-principles ◀── spring-web
-     │                ▲                    │
-     ▼                │                    ▼
-spring-persistence ───┴──── spring-security
-                                spring-testing
+spring-init ──▶ spring-principles ◀─────────────────────────────────┐
+     │                ▲                                               │
+     ▼                │                                               │
+spring-persistence ───┤◀── spring-web ◀── spring-security            │
+                       │         │              │                     │
+                       └─── spring-testing ─────┘                    │
+                                                                      │
+spring-batch ──────────────────────────────────────────────────────▶─┤
+spring-cache ──────────────────────────────────────────────────────▶─┤
+spring-observability ──────────────────────────────────────────────▶─┤
+spring-async ──────────────────────────────────────────────────────▶─┘
 ```
 
 ### 스킬 목록
@@ -43,10 +49,14 @@ spring-persistence ───┴──── spring-security
 |---|---|
 | `spring-init` | entry point. 프로젝트 초기화·Gradle 설정·패키지 구조·아키텍처 인터뷰 |
 | `spring-principles` | 공용 설계 원칙 — 다른 모든 스킬이 참조 |
-| `spring-web` | REST 컨트롤러·DTO·예외 처리 |
+| `spring-web` | REST 컨트롤러·DTO·예외 처리·`ProblemDetail` 예외 핸들링 |
 | `spring-persistence` | JPA / MyBatis 선택 가능한 영속성 계층 |
 | `spring-security` | 세션 / JWT 인증·인가 |
 | `spring-testing` | slice test · TestContainers 컨벤션 |
+| `spring-batch` | Chunk/Step 배치 잡 · JobBuilder/StepBuilder DSL · ItemReader/Writer |
+| `spring-cache` | Caffeine/Redis 캐시 추상화 · TTL · `unless` null 방어 |
+| `spring-observability` | Actuator · Micrometer · Structured Logging · tracing sampling probability |
+| `spring-async` | `@Async` + `ThreadPoolTaskExecutor` · `@Scheduled` ShedLock · `CompletableFuture` 예외 처리 |
 
 ### 핵심 설계 결정
 
@@ -80,6 +90,18 @@ skills/
   spring-testing/     slice test · TestContainers
     SKILL.md
     references/       slice-tests, testcontainers, fixtures
+  spring-batch/       배치 잡 (Chunk/Step/ItemReader/Writer)
+    SKILL.md
+    references/       job-design, chunk-processing, item-reader-writer
+  spring-cache/       캐시 추상화 (Caffeine/Redis, TTL, unless)
+    SKILL.md
+    references/       cache-config, caffeine, redis-cache, null-handling
+  spring-observability/ Actuator · Micrometer · Structured Logging
+    SKILL.md
+    references/       actuator-config, metrics, logging, tracing
+  spring-async/       @Async · ThreadPoolTaskExecutor · @Scheduled ShedLock
+    SKILL.md
+    references/       async-config, thread-pool, scheduled, exception-handling
 tests/                케이스 · 회귀 검증 가이드
 docs/                 ADR, 회고 로그
 ```
@@ -127,11 +149,17 @@ Claude 에게 입력:
 
 | 항목 | 위치 |
 |---|---|
-| 7개 시나리오 케이스 체크리스트 | `tests/cases.md` |
+| 8개 시나리오 케이스 체크리스트 + 실행 결과 기록 | `tests/cases.md` |
 | 회고 #8 보안 회귀 가이드 | `tests/regression-8-security-rest-api.md` |
 | 회고 #9 아키텍처 인터뷰 회귀 가이드 | `tests/regression-9-architecture-interview.md` |
 | 회고 #10 Initializr fallback 회귀 가이드 | `tests/regression-10-initializr-fallback.md` |
 | 회고 #11 Fallback 빌드 가능성 회귀 가이드 | `tests/regression-11-fallback-buildability.md` |
+| 회고 #12~#21 principles/web/persistence/security/testing 회귀 | `tests/regression-12-16-checklist.md` (각 스킬별) |
+| §A meta-regression — 10개 스킬 × 38개 자기참조 규칙 (grep 기반) | `tests/regression-22-meta-expanded.md` |
+| spring-batch 회귀 가이드 (B1~B4) | `tests/regression-23-batch-checklist.md` |
+| spring-cache 회귀 가이드 (C1~C4) | `tests/regression-24-cache-checklist.md` |
+| spring-observability 회귀 가이드 (O1~O5) | `tests/regression-25-observability-checklist.md` |
+| spring-async 회귀 가이드 (AS1~AS5) | `tests/regression-26-async-checklist.md` |
 | 수동 테스트 환경 설정 | `tests/manual-test-setup.md` |
 
 ---

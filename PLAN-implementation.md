@@ -605,3 +605,37 @@ spring-init 완성되면 멈추고 결과를 보여줘. 그 다음 spring-princi
 - 분기마다 `fetch-latest-versions.sh`를 돌려서 기본값이 업데이트되는지 확인
 - Spring Boot 메이저 버전 업(예: 5.0) 발표되면 `references/` 내용 검토
 - 테스트 케이스 정기 실행 (특히 케이스 1)
+
+---
+
+## K. Phase B/C 확장 스킬 — 추가 이행 기록
+
+F–J 의 설계-먼저(design-first) 방식과 달리, 4개 스킬은 아래 empirical 사이클로 구축됨:
+
+```
+v0.1 뼈대 작성 → BASELINE 실행(코드 생성 후 결함 수집) → 2차 회전(PASS 확인)
+→ §A meta-regression 확장(regression-22-meta-expanded.md 에 규칙 추가)
+→ Codex adversarial review 1회 → 지적 패치 → 재검증 PASS
+```
+
+### 스킬별 경로 및 회고 매핑
+
+| 스킬 | SKILL.md | regression 문서 | BASELINE 회고 | §A 확장 | codex 리뷰 |
+|------|----------|-----------------|---------------|---------|-----------|
+| `spring-batch` | `skills/spring-batch/SKILL.md` | `tests/regression-23-batch-checklist.md` | retro #23 | retro #27 (A7a~A7d) | retro #28/#29 |
+| `spring-cache` | `skills/spring-cache/SKILL.md` | `tests/regression-24-cache-checklist.md` | retro #24 | retro #27 (A8a~A8d) | retro #28/#29 |
+| `spring-observability` | `skills/spring-observability/SKILL.md` | `tests/regression-25-observability-checklist.md` | retro #25 | retro #27 (A9a~A9d) | retro #28/#29 |
+| `spring-async` | `skills/spring-async/SKILL.md` | `tests/regression-26-async-checklist.md` | retro #26 | retro #27 (A10a~A10e) | retro #28/#29 |
+
+### §A meta-regression 현황
+
+- 파일: `tests/regression-22-meta-expanded.md`
+- 총 규칙: **38개** (A1~A10e; retro #22 21개 → #27 38개 → #28/#29 패턴 보강)
+- 자기참조 위반: **0건** (2026-04-23 재확인)
+- known-limitation 3건(A7b/A7c/A8c/A9c) — 존재-확인 규칙의 구조적 한계, empirical 사이클로 보완
+
+### Codex adversarial review 결과 (retro #28/#29)
+
+- Phase D (commit `6dfe618`) 대상: High **0** · Medium **8→0** · Low **8→3** (known-limitation)
+- 패치 핵심: Boot 버전 필터 positive-target 인버트, FQCN alternation, 앵커 기반 bash 주석 제외
+- 표준 절차로 편입 (ADR-006)

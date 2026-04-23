@@ -11,7 +11,7 @@
 
 | 항목 | 결정 |
 |---|---|
-| 스킬 구조 | 주제별 분리 (6개 스킬) |
+| 스킬 구조 | 주제별 분리 (초기 6개 → Phase B/C 확장 10개) |
 | 시나리오 가중치 | 신규 프로젝트 생성 (scaffolding) 중심 |
 | 언어/빌드 | Java 21 + Gradle (Kotlin DSL) |
 | 영속성 | JPA + MyBatis 둘 다 지원 (런타임 선택) |
@@ -19,7 +19,9 @@
 | 원칙 반영 강도 | 원칙 + 템플릿 코드 + 안티패턴 (상세) |
 | Boot 버전 처리 | **하드코딩 금지. 항상 start.spring.io 메타데이터 API 호출** |
 
-## 스킬 세트 (6개)
+## 스킬 세트 (10개)
+
+초기 6개 (설계-먼저, F–J 구현 플랜 참조):
 
 1. **`spring-init`** — entry point. 프로젝트 초기화, Gradle 설정, 패키지 구조, 아키텍처 인터뷰
 2. **`spring-web`** — REST 컨트롤러, DTO, 예외 처리
@@ -27,6 +29,15 @@
 4. **`spring-security`** — 인증/인가
 5. **`spring-testing`** — 테스트 컨벤션 (slice test, TestContainers)
 6. **`spring-principles`** — 공용 설계 원칙 문서 (토비 스타일)
+
+Phase B/C empirical 추가 4개 (BASELINE → 2차 회전 → §A meta-regression → codex 리뷰; `PLAN-implementation.md` §K 참조):
+
+7. **`spring-batch`** — 배치 잡 (Chunk/Step/ItemReader/Writer, JobBuilder/StepBuilder DSL)
+8. **`spring-cache`** — 캐시 추상화 (Caffeine/Redis, TTL, `unless` null 방어, FQCN 어노테이션)
+9. **`spring-observability`** — Actuator + Micrometer + Structured Logging + tracing sampling probability
+10. **`spring-async`** — `@Async` + `ThreadPoolTaskExecutor` + `@Scheduled` ShedLock + `CompletableFuture` 예외 처리
+
+> Phase B/C 확장 배경: ADR-004 참조. §A meta-regression(38개 규칙) + Codex adversarial review 표준화 결정: ADR-005/006 및 retro #27~#29 로그 참조.
 
 ---
 

@@ -44,6 +44,13 @@ Spring Boot용 Claude Code Skill 세트를 만드는 프로젝트.
 5. `spring-security`
 6. `spring-testing`
 
+Phase B/C empirical 사이클로 추가된 스킬 (설계-먼저가 아닌 BASELINE → 2차 회전 → §A meta-regression → codex 리뷰 순으로 구축):
+
+7. `spring-batch` (Chunk + Step + ItemReader/Writer — retro #23)
+8. `spring-cache` (Caffeine/Redis, TTL, unless null 방어 — retro #24)
+9. `spring-observability` (Actuator + Micrometer + Structured Logging — retro #25)
+10. `spring-async` (@Async + ThreadPoolTaskExecutor + @Scheduled ShedLock — retro #26)
+
 ## skill-creator 사용
 
 스킬 생성 시 `skill-creator` 스킬을 사용한다. 각 스킬별로:
