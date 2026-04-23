@@ -195,6 +195,122 @@ echo "(위 결과 1건 이상 → PASS)"
 echo "=== [A1c] spring-init decision-tree 참조 ==="
 grep -rn "decision-tree\|결정 트리" $SKILLS/spring-init/ | head -3
 echo "(위 결과 1건 이상 → PASS)"
+
+# ─────────────────────────────────────────
+# spring-batch (확장: A7a~A7d)
+# ─────────────────────────────────────────
+
+# A7a: Boot 버전 하드코딩 없음 (latestVersion placeholder / shedlock 외부 라이브러리 허용)
+echo "=== [A7a] spring-batch Boot 버전 하드코딩 ==="
+grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-batch/ \
+  | grep -v "latestVersion\|shedlock\|jjwt\|mapstruct\|testcontainers\|//\|#\|gradle" \
+  || echo "PASS"
+
+# A7b: JobBuilder/StepBuilder DSL 참조 (1건 이상이어야 PASS)
+echo "=== [A7b] spring-batch JobBuilder/StepBuilder ==="
+grep -rn "JobBuilder\|StepBuilder" $SKILLS/spring-batch/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# A7c: ItemReader/JdbcCursorItemReader/JpaPagingItemReader 참조 (1건 이상이어야 PASS)
+echo "=== [A7c] spring-batch ItemReader ==="
+grep -rn "ItemReader\|JdbcCursorItemReader\|JpaPagingItemReader\|RepositoryItemReader" \
+  $SKILLS/spring-batch/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# A7d: chunk() 호출 참조 (1건 이상이어야 PASS)
+# 주의: .<T,R>chunk(...) type witness 구문은 >chunk( 형식 — "chunk(" 패턴으로 탐지
+echo "=== [A7d] spring-batch chunk() 참조 ==="
+grep -rn "chunk(" $SKILLS/spring-batch/ \
+  | grep -v "grep -rn\|# .*chunk\|chunk size 가\|권장 chunk" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# ─────────────────────────────────────────
+# spring-cache (확장: A8a~A8d)
+# ─────────────────────────────────────────
+
+# A8a: Boot 버전 하드코딩 없음 (caffeine/redis 외부 라이브러리 허용)
+echo "=== [A8a] spring-cache Boot 버전 하드코딩 ==="
+grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-cache/ \
+  | grep -v "latestVersion\|caffeine\|redis\|//\|#" \
+  || echo "PASS"
+
+# A8b: @EnableCaching 참조 (1건 이상이어야 PASS)
+echo "=== [A8b] spring-cache @EnableCaching ==="
+grep -rn "@EnableCaching" $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# A8c: unless 또는 SpEL null 방어 언급 (1건 이상이어야 PASS)
+echo "=== [A8c] spring-cache unless/SpEL null 방어 ==="
+grep -rn "unless\|#result.*null\|== null" $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# A8d: TTL 설정 언급 (1건 이상이어야 PASS)
+echo "=== [A8d] spring-cache TTL ==="
+grep -rn "expireAfterWrite\|entryTtl\|ttl:" $SKILLS/spring-cache/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# ─────────────────────────────────────────
+# spring-observability (확장: A9a~A9d)
+# ─────────────────────────────────────────
+
+# A9a: Boot 버전 하드코딩 없음 (logstash/micrometer/otel 외부 라이브러리 허용)
+echo "=== [A9a] spring-observability Boot 버전 하드코딩 ==="
+grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-observability/ \
+  | grep -v "latestVersion\|logstash\|micrometer\|otel\|opentelemetry\|//\|#" \
+  || echo "PASS"
+
+# A9b: Actuator include "*" wildcard 노출 예시 (안티패턴 맥락 외 0건이어야 PASS)
+echo "=== [A9b] spring-observability Actuator wildcard 노출 ==="
+grep -rn 'include.*"\*"\|include.*'"'"'\*'"'" $SKILLS/spring-observability/ \
+  | grep -v "금지\|안티패턴\|Before\|BAD\|WRONG\|grep -rn\|- \[ \]" \
+  || echo "PASS"
+
+# A9c: LogstashEncoder 또는 logging.structured.format 참조 (1건 이상이어야 PASS)
+echo "=== [A9c] spring-observability LogstashEncoder/structured.format ==="
+grep -rn "LogstashEncoder\|logging\.structured\.format" $SKILLS/spring-observability/ \
+  | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# A9d: sampling.probability 또는 sampling: 참조 (1건 이상이어야 PASS)
+echo "=== [A9d] spring-observability sampling.probability ==="
+grep -rn "sampling\.probability\|sampling:" $SKILLS/spring-observability/ \
+  | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# ─────────────────────────────────────────
+# spring-async (확장: A10a~A10e)
+# ─────────────────────────────────────────
+
+# A10a: Boot 버전 하드코딩 없음 (shedlock 외부 라이브러리 허용)
+echo "=== [A10a] spring-async Boot 버전 하드코딩 ==="
+grep -rEn '[0-9]+\.[0-9]+\.[0-9]+' $SKILLS/spring-async/ \
+  | grep -v "latestVersion\|shedlock\|//\|#" \
+  || echo "PASS"
+
+# A10b: SimpleAsyncTaskExecutor (안티패턴/echo 맥락 외 0건이어야 PASS)
+# echo "=== [AS1]..." 라인은 grep 명령 레이블 — 허용 맥락
+echo "=== [A10b] spring-async SimpleAsyncTaskExecutor ==="
+grep -rn "SimpleAsyncTaskExecutor" $SKILLS/spring-async/ \
+  | grep -v "절대 원칙\|사용하지 않는다\|사용 금지\|# AS1\|grep -rn\|echo\|- \[ \]\|banned\|// 금지" \
+  || echo "PASS"
+
+# A10c: new Thread( / Executors.newCachedThreadPool (bash 주석 설명 맥락 외 0건이어야 PASS)
+# 라인 142 = `# new Thread( — 원시 스레드 생성...` bash 주석 설명 — 허용 맥락
+echo "=== [A10c] spring-async 비관리 스레드 직접 생성 ==="
+grep -rn "new Thread(\|Executors\.newCachedThreadPool\|Executors\.newSingleThreadExecutor" \
+  $SKILLS/spring-async/ \
+  | grep -v "금지\|안티패턴\|// \|grep -rn\|원시 스레드\|무한 스레드풀\|UNSAFE\|- \[ \]\|WARN" \
+  || echo "PASS"
+
+# A10d: @EnableAsync 참조 (1건 이상이어야 PASS)
+echo "=== [A10d] spring-async @EnableAsync ==="
+grep -rn "@EnableAsync" $SKILLS/spring-async/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
+
+# A10e: exceptionally/handle 예외 처리 참조 (1건 이상이어야 PASS)
+echo "=== [A10e] spring-async exceptionally/handle ==="
+grep -rn "exceptionally\|\.handle(" $SKILLS/spring-async/ | grep -v "grep -rn" | head -3
+echo "(위 결과 1건 이상 → PASS)"
 ```
 
 ---
@@ -223,6 +339,10 @@ retro #14~#17 은 BASELINE sandbox 만 생성되고 2차 회전(SKILL 로드 후
 | 2026-04-23 | §B 2차 회전 — spring-web | PASS | 자기참조 위반 0건 (W5a multi-line scanner 포함) |
 | 2026-04-23 | §B 2차 회전 — spring-persistence | PASS | 자기참조 위반 0건 |
 | 2026-04-23 | §B 2차 회전 — spring-security | PASS | 자기참조 위반 0건 |
+| 2026-04-23 | §A 확장 — spring-batch (A7a~A7d) | PASS | 버전 하드코딩 0건; JobBuilder·ItemReader·chunk() 참조 각 1건+ |
+| 2026-04-23 | §A 확장 — spring-cache (A8a~A8d) | PASS | 버전 하드코딩 0건; @EnableCaching·unless·TTL 참조 각 1건+ |
+| 2026-04-23 | §A 확장 — spring-observability (A9a~A9d) | PASS | 버전 하드코딩 0건; wildcard 0건; LogstashEncoder·sampling 참조 각 1건+ |
+| 2026-04-23 | §A 확장 — spring-async (A10a~A10e) | PASS | 버전 하드코딩 0건; SimpleAsyncTaskExecutor·new Thread( 모두 허용 맥락; @EnableAsync·exceptionally 참조 각 1건+ |
 
 ### 자기참조 분석 세부 (허용 맥락 확인)
 
@@ -235,12 +355,14 @@ retro #14~#17 은 BASELINE sandbox 만 생성되고 2차 회전(SKILL 로드 후
 | spring-persistence | `@Transactional` line 102 | SKILL.md | `MemberService.register()` — Service 계층 정상 사용 | PASS |
 | spring-security | `addCorsMappings` | cors.md:11 | "적용되지 않는다" 금지 설명 맥락 | PASS |
 | spring-init | `1.20.3`, `1.6.3` | gradle-conventions.md:71,72 | testcontainers·mapstruct 버전 카탈로그 예시 — 라이브러리 버전 허용 | PASS |
+| spring-async | `SimpleAsyncTaskExecutor` | SKILL.md:144 | `echo "=== [AS1] SimpleAsyncTaskExecutor / 비관리 스레드 ==="` — grep 명령 레이블 echo 라인 | PASS |
+| spring-async | `new Thread(` | SKILL.md:142 | `# new Thread( — 원시 스레드 생성; Executors.newCachedThreadPool — 무한 스레드풀` — bash 주석 설명 맥락 | PASS |
 
 ---
 
 ## 최종 판정
 
-**§A 확장 (21개 체크) + §B 2차 회전 (4개 스킬) 전부 PASS — 자기참조 위반 없음.**
+**§A 확장 (38개 체크) + §B 2차 회전 (4개 스킬) 전부 PASS — 자기참조 위반 없음.**
 
-retro #20 §A 대비 확장된 21개 규칙에서도 스킬 문서가 자신이 강제하는 패턴을
-예시 코드에서 위반하지 않음을 확인했다.
+retro #22 기준 21개 규칙에 Phase B/C 4개 신규 스킬(batch/cache/observability/async) 17개 규칙을 추가해
+38개로 확장했다. 모든 규칙에서 SKILL 문서가 자신이 강제하는 패턴을 예시 코드에서 위반하지 않음을 확인했다.
